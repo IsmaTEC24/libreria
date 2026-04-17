@@ -1,6 +1,10 @@
 import BookCard from "../components/bookCard.jsx";
-import principitoImg from "../assets/principito.jpg";
-import libro1984Img from "../assets/1984.jpg";
+import principitoImg from "../assets/books/principito.jpg";
+import libro1984Img from "../assets/books/1984.jpg";
+import donquijoteImg from "../assets/books/donquijote.jpg";
+import orgulloPrejuicioImg from "../assets/books/orgulloyprejuicio.jpg";
+import draculaImg from "../assets/books/dracula.jpg";
+import fahrenheitImg from "../assets/books/fahrenheit.jpg";
 
 const continuarLeyendo = [
   {
@@ -24,25 +28,25 @@ const recomendados = [
     id: 3,
     titulo: "Don Quijote",
     autor: "Miguel de Cervantes",
-    portada: "https://via.placeholder.com/180x260?text=Don+Quijote",
+    portada: donquijoteImg,
   },
   {
     id: 4,
     titulo: "Orgullo y Prejuicio",
     autor: "Jane Austen",
-    portada: "https://via.placeholder.com/180x260?text=Orgullo+y+Prejuicio",
+    portada: orgulloPrejuicioImg,
   },
   {
     id: 5,
     titulo: "Drácula",
     autor: "Bram Stoker",
-    portada: "https://via.placeholder.com/180x260?text=Dracula",
+    portada: draculaImg,
   },
   {
     id: 6,
     titulo: "Fahrenheit 451",
     autor: "Ray Bradbury",
-    portada: "https://via.placeholder.com/180x260?text=Fahrenheit+451",
+    portada: fahrenheitImg,
   },
 ];
 
