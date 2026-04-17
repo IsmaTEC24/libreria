@@ -12,7 +12,9 @@ import LoginPage from "./pages/loginPage.jsx";
 import RegistroPage from "./pages/registroPage.jsx";
 import PerfilPage from "./pages/perfilPage.jsx";
 import MiBibliotecaPage from "./pages/miBibliotecaPage.jsx";
-import BooksPage from "./get_books/BooksPage.jsx";
+import BooksPage from "./peticiones_Azure/BooksPage.jsx";
+import UsersPage from "./peticiones_Azure/UsersPage.jsx";
+
 
 
 export default function App() {
@@ -25,6 +27,7 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="biblioteca" element={<BibliotecaPage />} />
         <Route path="libros" element={<BooksPage />} />
+        <Route path="usuarios" element={<UsersPage />} />
         <Route path="mi-biblioteca" element={<MiBibliotecaPage />} />
         <Route path="lectura" element={<LecturaPage />} />
         <Route path="admin-libros" element={<AdminLibrosPage />} />
