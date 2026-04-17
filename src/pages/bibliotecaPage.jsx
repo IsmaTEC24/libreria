@@ -1,18 +1,20 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 export default function BibliotecaPage() {
   const navigate = useNavigate();
-  const { books, categories, currentUserId, loading, error } = useAppData();
+  const { currentUser } = useAuth();
+  const { books, categories, loading, error } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   const librosUsuario = useMemo(() => {
-    return books.filter((book) => book.userId === currentUserId);
-  }, [books, currentUserId]);
+    return books.filter((book) => book.userId === currentUser?.id);
+  }, [books, currentUser]);
 
   const filteredBooks = useMemo(() => {
     return librosUsuario.filter((book) => {
@@ -27,6 +29,7 @@ export default function BibliotecaPage() {
     });
   }, [librosUsuario, searchTerm, selectedCategory]);
 
+  if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando biblioteca...</p>;
   if (error) return <p>{error}</p>;
 

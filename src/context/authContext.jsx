@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { loginUser } from "../services/authService.js";
+import { getUsers } from "../services/booksService.js";
 
 const AuthContext = createContext();
 
@@ -15,7 +15,15 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(email, password) {
-    const user = await loginUser(email, password);
+    const users = await getUsers();
+
+    const user = users.find(
+      (item) => item.email === email && item.password === password
+    );
+
+    if (!user) {
+      throw new Error("Correo o contraseña incorrectos");
+    }
 
     setCurrentUser(user);
     localStorage.setItem("currentUser", JSON.stringify(user));

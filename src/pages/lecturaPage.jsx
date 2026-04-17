@@ -1,51 +1,40 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getBookById } from "../services/booksService.js";
+import { useAppData } from "../context/appDataContext.jsx";
 
 export default function LecturaPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { books, readingProgress, loading, error } = useAppData();
 
   const libroId = location.state?.libroId || 1;
 
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const book = useMemo(() => {
+    return books.find((item) => item.id === libroId);
+  }, [books, libroId]);
+
+  const progresoLibro = useMemo(() => {
+    return readingProgress.find((item) => item.bookId === libroId) || null;
+  }, [readingProgress, libroId]);
 
   const paginasSimuladas = [
     `Este espacio representa la lectura del PDF.
 Más adelante aquí puedes mostrar el visor real del documento.`,
-
     `Por ahora el lector sigue funcionando con páginas simuladas,
 mientras conectan la lectura completa del archivo PDF.`,
-
     `La estructura ya queda lista para integrar el contenido real
 sin cambiar toda la interfaz visual.`,
   ];
 
-  const [paginaActual, setPaginaActual] = useState(0);
+  const paginaInicial =
+    progresoLibro?.currentPage && progresoLibro.currentPage <= paginasSimuladas.length
+      ? progresoLibro.currentPage - 1
+      : 0;
+
+  const [paginaActual, setPaginaActual] = useState(paginaInicial);
   const [tamanoFuente, setTamanoFuente] = useState(18);
   const [modoOscuroLectura, setModoOscuroLectura] = useState(false);
   const [anchoLectura, setAnchoLectura] = useState("normal");
-
-  useEffect(() => {
-    async function loadBook() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getBookById(libroId);
-        setBook(data);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar el libro.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadBook();
-  }, [libroId]);
 
   const totalPaginas = paginasSimuladas.length;
   const progreso = ((paginaActual + 1) / totalPaginas) * 100;
@@ -62,43 +51,9 @@ sin cambiar toda la interfaz visual.`,
     }
   }
 
-  function aumentarFuente() {
-    setTamanoFuente((prev) => prev + 2);
-  }
-
-  function disminuirFuente() {
-    if (tamanoFuente > 14) {
-      setTamanoFuente((prev) => prev - 2);
-    }
-  }
-
-  function cambiarTemaLectura() {
-    setModoOscuroLectura((prev) => !prev);
-  }
-
-  function cambiarAnchoLectura() {
-    setAnchoLectura((prev) => (prev === "normal" ? "amplio" : "normal"));
-  }
-
-  if (loading) {
-    return (
-      <section className="lecturaPage">
-        <div className="readingWrapper">
-          <p>Cargando libro...</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (error || !book) {
-    return (
-      <section className="lecturaPage">
-        <div className="readingWrapper">
-          <p>{error || "Libro no encontrado."}</p>
-        </div>
-      </section>
-    );
-  }
+  if (loading) return <p>Cargando lectura...</p>;
+  if (error) return <p>{error}</p>;
+  if (!book) return <p>Libro no encontrado.</p>;
 
   return (
     <section className="lecturaPage">
@@ -108,9 +63,7 @@ sin cambiar toda la interfaz visual.`,
             <button
               className="backButton"
               onClick={() =>
-                navigate("/detalle-libro", {
-                  state: { libroId: book.id },
-                })
+                navigate("/detalle-libro", { state: { libroId: book.id } })
               }
             >
               ← Volver al detalle
@@ -118,25 +71,36 @@ sin cambiar toda la interfaz visual.`,
 
             <div>
               <p className="readingLabel">Modo lectura</p>
-              <h1 className="readingTitle">{book.titulo}</h1>
-              <p className="readingAuthor">{book.autor}</p>
+              <h1 className="readingTitle">{book.title}</h1>
+              <p className="readingAuthor">{book.author}</p>
             </div>
           </div>
 
           <div className="readingTools">
-            <button className="toolButton" onClick={disminuirFuente}>
+            <button
+              className="toolButton"
+              onClick={() => setTamanoFuente((prev) => Math.max(prev - 2, 14))}
+            >
               A-
             </button>
-
-            <button className="toolButton" onClick={aumentarFuente}>
+            <button
+              className="toolButton"
+              onClick={() => setTamanoFuente((prev) => prev + 2)}
+            >
               A+
             </button>
-
-            <button className="toolButton" onClick={cambiarAnchoLectura}>
+            <button
+              className="toolButton"
+              onClick={() =>
+                setAnchoLectura((prev) => (prev === "normal" ? "amplio" : "normal"))
+              }
+            >
               {anchoLectura === "normal" ? "Ancho +" : "Ancho -"}
             </button>
-
-            <button className="toolButton" onClick={cambiarTemaLectura}>
+            <button
+              className="toolButton"
+              onClick={() => setModoOscuroLectura((prev) => !prev)}
+            >
               {modoOscuroLectura ? "☀ Claro" : "🌙 Oscuro"}
             </button>
           </div>
@@ -151,8 +115,7 @@ sin cambiar toda la interfaz visual.`,
           </div>
 
           <p className="readingProgressText">
-            Página {paginaActual + 1} de {totalPaginas} • {Math.round(progreso)}%
-            completado
+            Página {paginaActual + 1} de {totalPaginas} • {Math.round(progreso)}% completado
           </p>
         </div>
 

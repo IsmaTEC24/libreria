@@ -15,10 +15,9 @@ export function AppDataProvider({ children }) {
   const [books, setBooks] = useState([]);
   const [readingProgress, setReadingProgress] = useState([]);
   const [favorites, setFavorites] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const currentUserId = 1;
 
   async function loadAppData() {
     try {
@@ -41,7 +40,7 @@ export function AppDataProvider({ children }) {
       setFavorites(Array.isArray(favoritesData) ? favoritesData : []);
     } catch (err) {
       console.error(err);
-      setError("No se pudo cargar la información.");
+      setError("No se pudo cargar la información de la app.");
     } finally {
       setLoading(false);
     }
@@ -59,7 +58,6 @@ export function AppDataProvider({ children }) {
         books,
         readingProgress,
         favorites,
-        currentUserId,
         loading,
         error,
         reloadAppData: loadAppData,

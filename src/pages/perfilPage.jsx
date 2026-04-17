@@ -21,10 +21,7 @@ export default function PerfilPage() {
     return readingProgress.filter((item) => item.userId === currentUser.id).length;
   }, [readingProgress, currentUser]);
 
-  if (!currentUser) {
-    return <p>Debes iniciar sesión para ver tu perfil.</p>;
-  }
-
+  if (!currentUser) return <p>Debes iniciar sesión para ver tu perfil.</p>;
   if (loading) return <p>Cargando perfil...</p>;
   if (error) return <p>{error}</p>;
 

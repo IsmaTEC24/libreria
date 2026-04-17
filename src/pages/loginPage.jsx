@@ -77,14 +77,14 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="primaryButton authButton" disabled={loading}>
+          <button
+            type="submit"
+            className="primaryButton authButton"
+            disabled={loading}
+          >
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
         </form>
-
-        <button className="linkButton authLink" onClick={() => navigate("/registro")}>
-          ¿No tienes cuenta? Crear una cuenta
-        </button>
       </div>
     </section>
   );

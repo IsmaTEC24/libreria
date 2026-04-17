@@ -5,18 +5,20 @@ import {
   getBookById,
   updateBook,
 } from "../services/booksService.js";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 export default function FormLibroPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { categories, currentUserId, reloadAppData } = useAppData();
+  const { currentUser } = useAuth();
+  const { categories, reloadAppData } = useAppData();
 
   const libroId = location.state?.libroId;
   const modoEdicion = Boolean(libroId);
 
   const [formData, setFormData] = useState({
-    userId: currentUserId,
+    userId: currentUser?.id || 0,
     title: "",
     author: "",
     category: "",
@@ -39,8 +41,9 @@ export default function FormLibroPage() {
 
       try {
         const data = await getBookById(libroId);
+
         setFormData({
-          userId: data.userId,
+          userId: data.userId || currentUser?.id || 0,
           title: data.title || "",
           author: data.author || "",
           category: data.category || "",
@@ -62,7 +65,7 @@ export default function FormLibroPage() {
     }
 
     loadBook();
-  }, [libroId, modoEdicion]);
+  }, [libroId, modoEdicion, currentUser]);
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -77,10 +80,15 @@ export default function FormLibroPage() {
     event.preventDefault();
 
     try {
+      const payload = {
+        ...formData,
+        userId: currentUser.id,
+      };
+
       if (modoEdicion) {
-        await updateBook(libroId, formData);
+        await updateBook(libroId, payload);
       } else {
-        await createBook(formData);
+        await createBook(payload);
       }
 
       await reloadAppData();
@@ -91,6 +99,7 @@ export default function FormLibroPage() {
     }
   }
 
+  if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando formulario...</p>;
 
   return (
@@ -103,17 +112,32 @@ export default function FormLibroPage() {
         <form className="formGrid" onSubmit={handleSubmit}>
           <div className="formGroup">
             <label>Título</label>
-            <input name="title" value={formData.title} onChange={handleChange} required />
+            <input
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="formGroup">
             <label>Autor</label>
-            <input name="author" value={formData.author} onChange={handleChange} required />
+            <input
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="formGroup">
             <label>Categoría</label>
-            <select name="category" value={formData.category} onChange={handleChange} required>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+            >
               <option value="">Seleccione una categoría</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.name}>
@@ -125,7 +149,11 @@ export default function FormLibroPage() {
 
           <div className="formGroup">
             <label>Idioma</label>
-            <input name="language" value={formData.language} onChange={handleChange} />
+            <input
+              name="language"
+              value={formData.language}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="formGroup fullWidth">
@@ -140,17 +168,30 @@ export default function FormLibroPage() {
 
           <div className="formGroup">
             <label>URL portada</label>
-            <input name="coverUrl" value={formData.coverUrl} onChange={handleChange} />
+            <input
+              name="coverUrl"
+              value={formData.coverUrl}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="formGroup">
             <label>URL PDF</label>
-            <input name="pdfUrl" value={formData.pdfUrl} onChange={handleChange} required />
+            <input
+              name="pdfUrl"
+              value={formData.pdfUrl}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="formGroup">
             <label>Nombre PDF</label>
-            <input name="pdfFileName" value={formData.pdfFileName} onChange={handleChange} />
+            <input
+              name="pdfFileName"
+              value={formData.pdfFileName}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="formGroup">

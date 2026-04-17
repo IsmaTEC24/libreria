@@ -1,26 +1,21 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const {
-    books,
-    categories,
-    readingProgress,
-    currentUserId,
-    loading,
-    error,
-  } = useAppData();
+  const { currentUser } = useAuth();
+  const { books, categories, readingProgress, loading, error } = useAppData();
 
   const librosUsuario = useMemo(() => {
-    return books.filter((book) => book.userId === currentUserId);
-  }, [books, currentUserId]);
+    return books.filter((book) => book.userId === currentUser?.id);
+  }, [books, currentUser]);
 
   const continuarLeyendo = useMemo(() => {
     return readingProgress
-      .filter((item) => item.userId === currentUserId)
+      .filter((item) => item.userId === currentUser?.id)
       .map((progressItem) => {
         const book = books.find((item) => item.id === progressItem.bookId);
         if (!book) return null;
@@ -32,10 +27,11 @@ export default function HomePage() {
         };
       })
       .filter(Boolean);
-  }, [readingProgress, books, currentUserId]);
+  }, [readingProgress, books, currentUser]);
 
   const recomendados = librosUsuario.slice(0, 4);
 
+  if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando inicio...</p>;
   if (error) return <p>{error}</p>;
 
@@ -48,7 +44,7 @@ export default function HomePage() {
             Lee, organiza y continúa tus libros desde un solo lugar
           </h1>
           <p className="heroText">
-            Explora tu colección y retoma tus lecturas fácilmente.
+            Explora tu colección, retoma tus lecturas y administra tus libros de forma simple.
           </p>
 
           <div className="heroButtons">

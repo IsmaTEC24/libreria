@@ -1,17 +1,19 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteBook } from "../services/booksService.js";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 export default function AdminLibrosPage() {
   const navigate = useNavigate();
-  const { books, currentUserId, loading, error, reloadAppData } = useAppData();
+  const { currentUser } = useAuth();
+  const { books, loading, error, reloadAppData } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const librosUsuario = useMemo(() => {
-    return books.filter((book) => book.userId === currentUserId);
-  }, [books, currentUserId]);
+    return books.filter((book) => book.userId === currentUser?.id);
+  }, [books, currentUser]);
 
   const filteredBooks = useMemo(() => {
     return librosUsuario.filter((book) => {
@@ -35,6 +37,7 @@ export default function AdminLibrosPage() {
     }
   }
 
+  if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando administración...</p>;
   if (error) return <p>{error}</p>;
 
@@ -110,6 +113,12 @@ export default function AdminLibrosPage() {
                 </td>
               </tr>
             ))}
+
+            {filteredBooks.length === 0 && (
+              <tr>
+                <td colSpan="6">No tienes libros registrados.</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

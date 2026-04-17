@@ -8,8 +8,8 @@ const defaultHeaders = {
 
 async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: defaultHeaders,
     ...options,
+    headers: options.headers || defaultHeaders,
   });
 
   if (!response.ok) {
@@ -19,6 +19,7 @@ async function apiRequest(endpoint, options = {}) {
   return response.json();
 }
 
+/* USERS */
 export function getUsers() {
   return apiRequest("/users", {
     method: "GET",
@@ -60,6 +61,7 @@ export function deleteUser(id) {
   });
 }
 
+/* CATEGORIES */
 export function getCategories() {
   return apiRequest("/categories", {
     method: "GET",
@@ -69,6 +71,7 @@ export function getCategories() {
   });
 }
 
+/* BOOKS */
 export function getBooks() {
   return apiRequest("/books", {
     method: "GET",
@@ -110,6 +113,7 @@ export function deleteBook(id) {
   });
 }
 
+/* READING PROGRESS */
 export function getReadingProgress() {
   return apiRequest("/reading-progress", {
     method: "GET",
@@ -119,9 +123,67 @@ export function getReadingProgress() {
   });
 }
 
+export function getReadingProgressById(id) {
+  return apiRequest(`/reading-progress/${id}`, {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function createReadingProgress(progress) {
+  return apiRequest("/reading-progress", {
+    method: "POST",
+    body: JSON.stringify(progress),
+  });
+}
+
+export function updateReadingProgress(id, progress) {
+  return apiRequest(`/reading-progress/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(progress),
+  });
+}
+
+export function deleteReadingProgress(id) {
+  return apiRequest(`/reading-progress/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+/* FAVORITES */
 export function getFavorites() {
   return apiRequest("/favorites", {
     method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function getFavoriteById(id) {
+  return apiRequest(`/favorites/${id}`, {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function createFavorite(favorite) {
+  return apiRequest("/favorites", {
+    method: "POST",
+    body: JSON.stringify(favorite),
+  });
+}
+
+export function deleteFavorite(id) {
+  return apiRequest(`/favorites/${id}`, {
+    method: "DELETE",
     headers: {
       "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
     },

@@ -33,7 +33,6 @@ export default function Navbar() {
             <button className="themeButton" onClick={() => navigate("/perfil")}>
               👤
             </button>
-
             <button className="secondaryButton" onClick={handleLogout}>
               Salir
             </button>

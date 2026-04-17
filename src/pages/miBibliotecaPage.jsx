@@ -1,20 +1,23 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 export default function MiBibliotecaPage() {
   const navigate = useNavigate();
-  const { books, favorites, currentUserId, loading, error } = useAppData();
+  const { currentUser } = useAuth();
+  const { books, favorites, loading, error } = useAppData();
 
   const favoritosUsuario = useMemo(() => {
     const favoritosIds = favorites
-      .filter((fav) => fav.userId === currentUserId)
+      .filter((fav) => fav.userId === currentUser?.id)
       .map((fav) => fav.bookId);
 
     return books.filter((book) => favoritosIds.includes(book.id));
-  }, [favorites, books, currentUserId]);
+  }, [favorites, books, currentUser]);
 
+  if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando biblioteca personal...</p>;
   if (error) return <p>{error}</p>;
 
