@@ -1,68 +1,71 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { libros } from "../data/mockData.js";
 
 export default function LecturaPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const libro = {
-    titulo: "El Principito",
-    autor: "Antoine de Saint-Exupéry",
-    paginas: [
-      `Cuando yo tenía seis años vi en un libro sobre la selva virgen una magnífica lámina.
+  const libroId = location.state?.libroId || 1;
+  const libro = libros.find((item) => item.id === libroId) || libros[0];
+
+  const paginasSimuladas = [
+    `Cuando yo tenía seis años vi en un libro sobre la selva virgen una magnífica lámina.
 Representaba una serpiente boa que se tragaba a una fiera. En el libro decía:
 "Las boas tragan a sus presas enteras, sin masticarlas..."`,
 
-      `Reflexioné mucho en ese momento sobre las aventuras de la jungla y, a mi vez,
+    `Reflexioné mucho en ese momento sobre las aventuras de la jungla y, a mi vez,
 logré trazar con un lápiz de colores mi primer dibujo. Mi dibujo número uno era así.
 Enseñé mi obra maestra a las personas grandes y les pregunté si mi dibujo les daba miedo.`,
 
-      `Me contestaron: "¿Por qué habría de asustar un sombrero?" Mi dibujo no representaba un sombrero.
+    `Me contestaron: "¿Por qué habría de asustar un sombrero?" Mi dibujo no representaba un sombrero.
 Representaba una serpiente boa que digería un elefante. Dibujé entonces el interior de la serpiente
 boa para que las personas grandes pudieran comprender.`,
-    ],
-  };
+
+    `Las personas grandes me aconsejaron que dejara a un lado los dibujos de serpientes boas abiertas o cerradas
+y que me interesara un poco más en la geografía, la historia, el cálculo y la gramática.`,
+
+    `Fue así como abandoné, a la edad de seis años, una magnífica carrera de pintor.
+Había quedado desilusionado por el fracaso de mi dibujo número uno y de mi dibujo número dos.`,
+  ];
 
   const [paginaActual, setPaginaActual] = useState(0);
   const [tamanoFuente, setTamanoFuente] = useState(18);
   const [modoOscuroLectura, setModoOscuroLectura] = useState(false);
   const [anchoLectura, setAnchoLectura] = useState("normal");
 
-  const totalPaginas = libro.paginas.length;
+  const totalPaginas = paginasSimuladas.length;
   const progreso = ((paginaActual + 1) / totalPaginas) * 100;
 
-  const irPaginaAnterior = () => {
+  function irPaginaAnterior() {
     if (paginaActual > 0) {
-      setPaginaActual(paginaActual - 1);
+      setPaginaActual((prev) => prev - 1);
     }
-  };
+  }
 
-  const irPaginaSiguiente = () => {
+  function irPaginaSiguiente() {
     if (paginaActual < totalPaginas - 1) {
-      setPaginaActual(paginaActual + 1);
+      setPaginaActual((prev) => prev + 1);
     }
-  };
+  }
 
-  const aumentarFuente = () => {
-    setTamanoFuente(tamanoFuente + 2);
-  };
+  function aumentarFuente() {
+    setTamanoFuente((prev) => prev + 2);
+  }
 
-  const disminuirFuente = () => {
+  function disminuirFuente() {
     if (tamanoFuente > 14) {
-      setTamanoFuente(tamanoFuente - 2);
+      setTamanoFuente((prev) => prev - 2);
     }
-  };
+  }
 
-  const cambiarTemaLectura = () => {
-    setModoOscuroLectura(!modoOscuroLectura);
-  };
+  function cambiarTemaLectura() {
+    setModoOscuroLectura((prev) => !prev);
+  }
 
-  const cambiarAnchoLectura = () => {
-    if (anchoLectura === "normal") {
-      setAnchoLectura("amplio");
-    } else {
-      setAnchoLectura("normal");
-    }
-  };
+  function cambiarAnchoLectura() {
+    setAnchoLectura((prev) => (prev === "normal" ? "amplio" : "normal"));
+  }
 
   return (
     <section className="lecturaPage">
@@ -71,9 +74,9 @@ boa para que las personas grandes pudieran comprender.`,
           <div className="readingHeaderLeft">
             <button
               className="backButton"
-              onClick={() => navigate("/biblioteca")}
+              onClick={() => navigate("/detalle-libro", { state: { libroId: libro.id } })}
             >
-              ← Volver a biblioteca
+              ← Volver al detalle
             </button>
 
             <div>
@@ -122,7 +125,7 @@ boa para que las personas grandes pudieran comprender.`,
           }`}
           style={{ fontSize: `${tamanoFuente}px` }}
         >
-          <p className="readingText">{libro.paginas[paginaActual]}</p>
+          <p className="readingText">{paginasSimuladas[paginaActual]}</p>
         </article>
 
         <div className="readingFooter">

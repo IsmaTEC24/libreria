@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Navbar() {
+  const navigate = useNavigate();
+
   return (
     <header className="navbar">
       <div>
@@ -13,7 +17,12 @@ export default function Navbar() {
           className="searchInput"
         />
 
-        <button className="themeButton">🌙</button>
+        <button
+          className="themeButton"
+          onClick={() => navigate("/perfil")}
+        >
+          👤
+        </button>
       </div>
     </header>
   );

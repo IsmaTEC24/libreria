@@ -1,90 +1,71 @@
+import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
-import principitoImg from "../assets/books/principito.jpg";
-import libro1984Img from "../assets/books/1984.jpg";
-import donquijoteImg from "../assets/books/donquijote.jpg";
-import orgulloPrejuicioImg from "../assets/books/orgulloyprejuicio.jpg";
-import draculaImg from "../assets/books/dracula.jpg";
-import fahrenheitImg from "../assets/books/fahrenheit.jpg";
-
-const continuarLeyendo = [
-  {
-    id: 1,
-    titulo: "El Principito",
-    autor: "Antoine de Saint-Exupéry",
-    portada: principitoImg,
-    progreso: 45,
-  },
-  {
-    id: 2,
-    titulo: "1984",
-    autor: "George Orwell",
-    portada: libro1984Img,
-    progreso: 70,
-  },
-];
-
-const recomendados = [
-  {
-    id: 3,
-    titulo: "Don Quijote",
-    autor: "Miguel de Cervantes",
-    portada: donquijoteImg,
-  },
-  {
-    id: 4,
-    titulo: "Orgullo y Prejuicio",
-    autor: "Jane Austen",
-    portada: orgulloPrejuicioImg,
-  },
-  {
-    id: 5,
-    titulo: "Drácula",
-    autor: "Bram Stoker",
-    portada: draculaImg,
-  },
-  {
-    id: 6,
-    titulo: "Fahrenheit 451",
-    autor: "Ray Bradbury",
-    portada: fahrenheitImg,
-  },
-];
-
-const categorias = [
-  "Ficción",
-  "Historia",
-  "Ciencia",
-  "Tecnología",
-  "Fantasía",
-  "Novela",
-];
+import { libros, progresoLectura } from "../data/mockData.js";
 
 export default function HomePage() {
+  const navigate = useNavigate();
+
+  const continuarLeyendo = progresoLectura.map((progresoItem) => {
+    const libro = libros.find((item) => item.id === progresoItem.libroId);
+
+    return {
+      ...libro,
+      progreso: progresoItem.progreso,
+    };
+  });
+
+  const recomendados = libros.slice(0, 4);
+
+  const categorias = [
+    "Ficción",
+    "Historia",
+    "Ciencia ficción",
+    "Terror",
+    "Tecnología",
+    "Novela",
+  ];
+
   return (
     <section className="homePage">
       <section className="heroSection">
         <div className="heroContent">
           <span className="heroBadge">Biblioteca digital</span>
+
           <h1 className="heroTitle">
             Lee, organiza y continúa tus libros desde un solo lugar
           </h1>
+
           <p className="heroText">
-            Disfruta una experiencia de lectura simple, cómoda y visualmente
-            limpia. Explora tus libros, retoma tu progreso y descubre nuevas
-            lecturas.
+            Explora tu colección, retoma tus lecturas y administra tus libros
+            con una experiencia simple, limpia y enfocada en la lectura.
           </p>
 
           <div className="heroButtons">
-            <button className="primaryButton">Explorar biblioteca</button>
-            <button className="secondaryButton">Continuar leyendo</button>
+            <button
+              className="primaryButton"
+              onClick={() => navigate("/biblioteca")}
+            >
+              Explorar biblioteca
+            </button>
+
+            <button
+              className="secondaryButton"
+              onClick={() => navigate("/mi-biblioteca")}
+            >
+              Continuar leyendo
+            </button>
           </div>
         </div>
 
         <div className="heroPanel">
           <div className="heroMiniCard">
             <p className="heroMiniLabel">Leyendo ahora</p>
-            <h3>El Principito</h3>
-            <p>Capítulo 4 • 45% completado</p>
+            <h3>{continuarLeyendo[0]?.titulo || "Sin lecturas activas"}</h3>
+            <p>
+              {continuarLeyendo[0]
+                ? `${continuarLeyendo[0].progreso}% completado`
+                : "Agrega un libro a tu biblioteca"}
+            </p>
           </div>
         </div>
       </section>
@@ -92,19 +73,27 @@ export default function HomePage() {
       <section className="sectionBlock">
         <div className="sectionHeader">
           <h2>Continuar leyendo</h2>
-          <p>Retoma tu progreso y sigue donde lo dejaste.</p>
+          <p>Retoma tus libros desde donde los dejaste.</p>
         </div>
 
         <div className="booksGrid">
           {continuarLeyendo.map((libro) => (
-            <BookCard
+            <div
               key={libro.id}
-              titulo={libro.titulo}
-              autor={libro.autor}
-              portada={libro.portada}
-              progreso={libro.progreso}
-              mostrarProgreso={true}
-            />
+              onClick={() =>
+                navigate("/lectura", {
+                  state: { libroId: libro.id },
+                })
+              }
+            >
+              <BookCard
+                titulo={libro.titulo}
+                autor={libro.autor}
+                portada={libro.portada}
+                progreso={libro.progreso}
+                mostrarProgreso={true}
+              />
+            </div>
           ))}
         </div>
       </section>
@@ -127,17 +116,25 @@ export default function HomePage() {
       <section className="sectionBlock">
         <div className="sectionHeader">
           <h2>Libros recomendados</h2>
-          <p>Algunas lecturas destacadas para comenzar.</p>
+          <p>Algunas lecturas destacadas dentro del catálogo.</p>
         </div>
 
         <div className="booksGrid">
           {recomendados.map((libro) => (
-            <BookCard
+            <div
               key={libro.id}
-              titulo={libro.titulo}
-              autor={libro.autor}
-              portada={libro.portada}
-            />
+              onClick={() =>
+                navigate("/detalle-libro", {
+                  state: { libroId: libro.id },
+                })
+              }
+            >
+              <BookCard
+                titulo={libro.titulo}
+                autor={libro.autor}
+                portada={libro.portada}
+              />
+            </div>
           ))}
         </div>
       </section>

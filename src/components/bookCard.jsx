@@ -1,5 +1,3 @@
-import { useNavigate } from "react-router-dom";
-
 export default function BookCard({
   titulo,
   autor,
@@ -7,28 +5,34 @@ export default function BookCard({
   progreso,
   mostrarProgreso = false,
 }) {
-
-  const navigate = useNavigate();
-
   return (
-    <article
-      className="bookCard"
-      onClick={() => navigate("/lectura")}
-      style={{ cursor: "pointer" }}
-    >
+    <article className="bookCard" style={{ cursor: "pointer" }}>
       <img
         src={portada}
-        alt={titulo}
+        alt={`Portada de ${titulo}`}
         className="bookCardImage"
       />
 
       <div className="bookCardBody">
-        <h3>{titulo}</h3>
-        <p>{autor}</p>
+        <h3 className="bookCardTitle">{titulo}</h3>
+        <p className="bookCardAuthor">{autor}</p>
 
         {mostrarProgreso && (
-          <p>{progreso}% leído</p>
+          <div className="bookProgressContainer">
+            <div className="bookProgressBar">
+              <div
+                className="bookProgressFill"
+                style={{ width: `${progreso}%` }}
+              ></div>
+            </div>
+
+            <span className="bookProgressText">{progreso}% leído</span>
+          </div>
         )}
+
+        <button className="primaryButton">
+          {mostrarProgreso ? "Continuar leyendo" : "Ver libro"}
+        </button>
       </div>
     </article>
   );
