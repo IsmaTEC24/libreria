@@ -1,0 +1,371 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --background: #f4f6fb;
+  --surface: #ffffff;
+  --surface-soft: #eef2ff;
+  --text: #1f2937;
+  --text-soft: #6b7280;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --border: #e5e7eb;
+  --sidebar: #111827;
+  --sidebar-hover: #1f2937;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.appContainer {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: var(--sidebar);
+  color: white;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sidebarTop {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logo {
+  font-size: 1.7rem;
+}
+
+.sidebarText {
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebarNav a {
+  padding: 12px 14px;
+  border-radius: 10px;
+  transition: 0.2s ease;
+}
+
+.sidebarNav a:hover,
+.sidebarNav a.active {
+  background: var(--sidebar-hover);
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  background: var(--surface);
+  padding: 20px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.navbarTitle {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.navbarSubtitle {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.navbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchInput {
+  width: 340px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  outline: none;
+}
+
+.themeButton {
+  border: none;
+  background: var(--surface-soft);
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.pageContent {
+  padding: 28px;
+}
+
+.homePage {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.heroSection {
+  background: linear-gradient(135deg, #ffffff, #eef2ff);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 36px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heroBadge {
+  width: fit-content;
+  background: #e0e7ff;
+  color: var(--primary);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.heroTitle {
+  font-size: 2.3rem;
+  line-height: 1.2;
+}
+
+.heroText {
+  color: var(--text-soft);
+  max-width: 680px;
+  line-height: 1.6;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.primaryButton {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.primaryButton:hover {
+  background: var(--primary-hover);
+}
+
+.secondaryButton {
+  background: white;
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.heroPanel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heroMiniCard {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.heroMiniLabel {
+  color: var(--text-soft);
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sectionHeader p {
+  color: var(--text-soft);
+}
+
+.booksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.bookCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bookCardImage {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+}
+
+.bookCardBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bookCardTitle {
+  font-size: 1.05rem;
+}
+
+.bookCardAuthor {
+  color: var(--text-soft);
+  font-size: 0.95rem;
+}
+
+.bookProgressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bookProgressBar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bookProgressFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 999px;
+}
+
+.bookProgressText {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.categoryContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.categoryChip {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.categoryChip:hover {
+  background: #eef2ff;
+  color: var(--primary);
+}
+
+@media (max-width: 992px) {
+  .heroSection {
+    grid-template-columns: 1fr;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .appContainer {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .navbarActions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroTitle {
+    font-size: 1.8rem;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+  }
+
+  .pageContent {
+    padding: 18px;
+  }
+
+  .heroSection {
+    padding: 24px;
+  }
+}
