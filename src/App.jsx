@@ -12,6 +12,8 @@ import LoginPage from "./pages/loginPage.jsx";
 import RegistroPage from "./pages/registroPage.jsx";
 import PerfilPage from "./pages/perfilPage.jsx";
 import MiBibliotecaPage from "./pages/miBibliotecaPage.jsx";
+import BooksPage from "./get_books/BooksPage.jsx";
+
 
 export default function App() {
   return (
@@ -22,6 +24,7 @@ export default function App() {
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="biblioteca" element={<BibliotecaPage />} />
+        <Route path="libros" element={<BooksPage />} />
         <Route path="mi-biblioteca" element={<MiBibliotecaPage />} />
         <Route path="lectura" element={<LecturaPage />} />
         <Route path="admin-libros" element={<AdminLibrosPage />} />
