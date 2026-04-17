@@ -1,61 +1,48 @@
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
-import { libros, progresoLectura, favoritos } from "../data/mockData.js";
+import { useAppData } from "../context/appDataContext.jsx";
 
 export default function MiBibliotecaPage() {
-  const librosLeyendo = progresoLectura.map((progresoItem) => {
-    const libro = libros.find((item) => item.id === progresoItem.libroId);
+  const navigate = useNavigate();
+  const { books, favorites, currentUserId, loading, error } = useAppData();
 
-    return {
-      ...libro,
-      progreso: progresoItem.progreso,
-    };
-  });
+  const favoritosUsuario = useMemo(() => {
+    const favoritosIds = favorites
+      .filter((fav) => fav.userId === currentUserId)
+      .map((fav) => fav.bookId);
 
-  const librosFavoritos = favoritos.map((favoritoItem) => {
-    return libros.find((item) => item.id === favoritoItem.libroId);
-  });
+    return books.filter((book) => favoritosIds.includes(book.id));
+  }, [favorites, books, currentUserId]);
+
+  if (loading) return <p>Cargando biblioteca personal...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <section className="miBibliotecaPage">
       <div className="sectionHeader">
         <h1>Mi biblioteca</h1>
-        <p>Consulta tus favoritos, lecturas actuales y libros guardados.</p>
       </div>
 
       <section className="sectionBlock">
         <div className="sectionHeader">
-          <h2>Continuar leyendo</h2>
-          <p>Libros que tienes en progreso actualmente.</p>
-        </div>
-
-        <div className="booksGrid">
-          {librosLeyendo.map((libro) => (
-            <BookCard
-              key={libro.id}
-              titulo={libro.titulo}
-              autor={libro.autor}
-              portada={libro.portada}
-              progreso={libro.progreso}
-              mostrarProgreso={true}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="sectionBlock">
-        <div className="sectionHeader">
           <h2>Favoritos</h2>
-          <p>Libros guardados para leer más tarde.</p>
         </div>
 
         <div className="booksGrid">
-          {librosFavoritos.map((libro) => (
-            <BookCard
-              key={libro.id}
-              titulo={libro.titulo}
-              autor={libro.autor}
-              portada={libro.portada}
-            />
+          {favoritosUsuario.map((book) => (
+            <div
+              key={book.id}
+              onClick={() =>
+                navigate("/detalle-libro", { state: { libroId: book.id } })
+              }
+            >
+              <BookCard
+                titulo={book.title}
+                autor={book.author}
+                portada={book.coverUrl || "/assets/defaultBook.png"}
+              />
+            </div>
           ))}
         </div>
       </section>

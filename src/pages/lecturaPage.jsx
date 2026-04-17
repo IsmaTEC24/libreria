@@ -1,38 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { libros } from "../data/mockData.js";
+import { getBookById } from "../services/booksService.js";
 
 export default function LecturaPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   const libroId = location.state?.libroId || 1;
-  const libro = libros.find((item) => item.id === libroId) || libros[0];
+
+  const [book, setBook] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const paginasSimuladas = [
-    `Cuando yo tenía seis años vi en un libro sobre la selva virgen una magnífica lámina.
-Representaba una serpiente boa que se tragaba a una fiera. En el libro decía:
-"Las boas tragan a sus presas enteras, sin masticarlas..."`,
+    `Este espacio representa la lectura del PDF.
+Más adelante aquí puedes mostrar el visor real del documento.`,
 
-    `Reflexioné mucho en ese momento sobre las aventuras de la jungla y, a mi vez,
-logré trazar con un lápiz de colores mi primer dibujo. Mi dibujo número uno era así.
-Enseñé mi obra maestra a las personas grandes y les pregunté si mi dibujo les daba miedo.`,
+    `Por ahora el lector sigue funcionando con páginas simuladas,
+mientras conectan la lectura completa del archivo PDF.`,
 
-    `Me contestaron: "¿Por qué habría de asustar un sombrero?" Mi dibujo no representaba un sombrero.
-Representaba una serpiente boa que digería un elefante. Dibujé entonces el interior de la serpiente
-boa para que las personas grandes pudieran comprender.`,
-
-    `Las personas grandes me aconsejaron que dejara a un lado los dibujos de serpientes boas abiertas o cerradas
-y que me interesara un poco más en la geografía, la historia, el cálculo y la gramática.`,
-
-    `Fue así como abandoné, a la edad de seis años, una magnífica carrera de pintor.
-Había quedado desilusionado por el fracaso de mi dibujo número uno y de mi dibujo número dos.`,
+    `La estructura ya queda lista para integrar el contenido real
+sin cambiar toda la interfaz visual.`,
   ];
 
   const [paginaActual, setPaginaActual] = useState(0);
   const [tamanoFuente, setTamanoFuente] = useState(18);
   const [modoOscuroLectura, setModoOscuroLectura] = useState(false);
   const [anchoLectura, setAnchoLectura] = useState("normal");
+
+  useEffect(() => {
+    async function loadBook() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getBookById(libroId);
+        setBook(data);
+      } catch (err) {
+        console.error(err);
+        setError("No se pudo cargar el libro.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadBook();
+  }, [libroId]);
 
   const totalPaginas = paginasSimuladas.length;
   const progreso = ((paginaActual + 1) / totalPaginas) * 100;
@@ -67,6 +80,26 @@ Había quedado desilusionado por el fracaso de mi dibujo número uno y de mi dib
     setAnchoLectura((prev) => (prev === "normal" ? "amplio" : "normal"));
   }
 
+  if (loading) {
+    return (
+      <section className="lecturaPage">
+        <div className="readingWrapper">
+          <p>Cargando libro...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !book) {
+    return (
+      <section className="lecturaPage">
+        <div className="readingWrapper">
+          <p>{error || "Libro no encontrado."}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="lecturaPage">
       <div className="readingWrapper">
@@ -74,15 +107,19 @@ Había quedado desilusionado por el fracaso de mi dibujo número uno y de mi dib
           <div className="readingHeaderLeft">
             <button
               className="backButton"
-              onClick={() => navigate("/detalle-libro", { state: { libroId: libro.id } })}
+              onClick={() =>
+                navigate("/detalle-libro", {
+                  state: { libroId: book.id },
+                })
+              }
             >
               ← Volver al detalle
             </button>
 
             <div>
               <p className="readingLabel">Modo lectura</p>
-              <h1 className="readingTitle">{libro.titulo}</h1>
-              <p className="readingAuthor">{libro.autor}</p>
+              <h1 className="readingTitle">{book.titulo}</h1>
+              <p className="readingAuthor">{book.autor}</p>
             </div>
           </div>
 

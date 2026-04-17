@@ -1,54 +1,61 @@
+import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { libros } from "../data/mockData.js";
+import { useAppData } from "../context/appDataContext.jsx";
 
 export default function DetalleLibroPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { books, loading, error } = useAppData();
 
   const libroId = location.state?.libroId || 1;
-  const libro = libros.find((item) => item.id === libroId) || libros[0];
+
+  const book = useMemo(() => {
+    return books.find((item) => item.id === libroId);
+  }, [books, libroId]);
+
+  if (loading) return <p>Cargando libro...</p>;
+  if (error) return <p>{error}</p>;
+  if (!book) return <p>Libro no encontrado.</p>;
 
   return (
     <section className="detalleLibroPage">
       <div className="detalleLibroCard">
         <img
-          src={libro.portada}
-          alt={`Portada de ${libro.titulo}`}
+          src={book.coverUrl || "/assets/defaultBook.png"}
+          alt={book.title}
           className="detalleLibroImage"
         />
 
         <div className="detalleLibroContent">
-          <span className="heroBadge">{libro.categoria}</span>
-          <h1>{libro.titulo}</h1>
-          <p className="detalleAutor">{libro.autor}</p>
-          <p className="detalleDescripcion">{libro.descripcion}</p>
+          <span className="heroBadge">{book.category}</span>
+          <h1>{book.title}</h1>
+          <p className="detalleAutor">{book.author}</p>
+          <p className="detalleDescripcion">{book.description}</p>
 
           <div className="detalleMeta">
             <div className="metaItem">
-              <strong>Estado</strong>
-              <span>{libro.estado}</span>
+              <strong>Idioma</strong>
+              <span>{book.language}</span>
             </div>
-
             <div className="metaItem">
               <strong>Páginas</strong>
-              <span>{libro.paginas}</span>
+              <span>{book.totalPages}</span>
             </div>
-
             <div className="metaItem">
-              <strong>Idioma</strong>
-              <span>{libro.idioma}</span>
+              <strong>Estado</strong>
+              <span>{book.currentStatus}</span>
             </div>
           </div>
 
           <div className="detalleActions">
             <button
               className="primaryButton"
-              onClick={() => navigate("/lectura", { state: { libroId: libro.id } })}
+              onClick={() =>
+                navigate("/lectura", { state: { libroId: book.id } })
+              }
             >
               Leer ahora
             </button>
-
-            <button className="secondaryButton">Agregar a favoritos</button>
           </div>
         </div>
       </div>

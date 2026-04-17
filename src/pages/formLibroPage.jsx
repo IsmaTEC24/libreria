@@ -1,151 +1,200 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { libros } from "../data/mockData.js";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  createBook,
+  getBookById,
+  updateBook,
+} from "../services/booksService.js";
+import { useAppData } from "../context/appDataContext.jsx";
 
 export default function FormLibroPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { categories, currentUserId, reloadAppData } = useAppData();
 
-  const modoEdicion = location.state?.modo === "editar";
   const libroId = location.state?.libroId;
-
-  const libroEditar = libros.find((item) => item.id === libroId);
+  const modoEdicion = Boolean(libroId);
 
   const [formData, setFormData] = useState({
-    titulo: libroEditar?.titulo || "",
-    autor: libroEditar?.autor || "",
-    categoria: libroEditar?.categoria || "",
-    descripcion: libroEditar?.descripcion || "",
-    estado: libroEditar?.estado || "Borrador",
-    portada: null,
-    pdf: null,
+    userId: currentUserId,
+    title: "",
+    author: "",
+    category: "",
+    description: "",
+    language: "es",
+    coverUrl: "",
+    pdfUrl: "",
+    pdfFileName: "",
+    pdfFileSize: 0,
+    totalPages: 0,
+    currentStatus: "activo",
+    isPublic: true,
   });
 
+  const [loading, setLoading] = useState(modoEdicion);
+
+  useEffect(() => {
+    async function loadBook() {
+      if (!modoEdicion) return;
+
+      try {
+        const data = await getBookById(libroId);
+        setFormData({
+          userId: data.userId,
+          title: data.title || "",
+          author: data.author || "",
+          category: data.category || "",
+          description: data.description || "",
+          language: data.language || "es",
+          coverUrl: data.coverUrl || "",
+          pdfUrl: data.pdfUrl || "",
+          pdfFileName: data.pdfFileName || "",
+          pdfFileSize: data.pdfFileSize || 0,
+          totalPages: data.totalPages || 0,
+          currentStatus: data.currentStatus || "activo",
+          isPublic: data.isPublic ?? true,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadBook();
+  }, [libroId, modoEdicion]);
+
   function handleChange(event) {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   }
 
-  function handleFileChange(event) {
-    const { name, files } = event.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files[0] || null,
-    }));
-  }
-
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    console.log("Libro enviado:", formData);
-    navigate("/admin-libros");
+
+    try {
+      if (modoEdicion) {
+        await updateBook(libroId, formData);
+      } else {
+        await createBook(formData);
+      }
+
+      await reloadAppData();
+      navigate("/admin-libros");
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo guardar el libro.");
+    }
   }
+
+  if (loading) return <p>Cargando formulario...</p>;
 
   return (
     <section className="formPage">
       <div className="formContainer">
         <div className="formHeader">
           <h1>{modoEdicion ? "Editar libro" : "Nuevo libro"}</h1>
-          <p>
-            {modoEdicion
-              ? "Modifica la información del libro y deja lista su estructura para Azure."
-              : "Agrega la información del libro y deja lista su estructura para Azure."}
-          </p>
         </div>
 
         <form className="formGrid" onSubmit={handleSubmit}>
           <div className="formGroup">
-            <label htmlFor="titulo">Título</label>
-            <input
-              id="titulo"
-              name="titulo"
-              type="text"
-              value={formData.titulo}
-              onChange={handleChange}
-              required
-            />
+            <label>Título</label>
+            <input name="title" value={formData.title} onChange={handleChange} required />
           </div>
 
           <div className="formGroup">
-            <label htmlFor="autor">Autor</label>
-            <input
-              id="autor"
-              name="autor"
-              type="text"
-              value={formData.autor}
-              onChange={handleChange}
-              required
-            />
+            <label>Autor</label>
+            <input name="author" value={formData.author} onChange={handleChange} required />
           </div>
 
           <div className="formGroup">
-            <label htmlFor="categoria">Categoría</label>
-            <select
-              id="categoria"
-              name="categoria"
-              value={formData.categoria}
-              onChange={handleChange}
-              required
-            >
+            <label>Categoría</label>
+            <select name="category" value={formData.category} onChange={handleChange} required>
               <option value="">Seleccione una categoría</option>
-              <option value="Ficción">Ficción</option>
-              <option value="Ciencia ficción">Ciencia ficción</option>
-              <option value="Historia">Historia</option>
-              <option value="Terror">Terror</option>
-              <option value="Educación">Educación</option>
-              <option value="Tecnología">Tecnología</option>
-              <option value="Novela">Novela</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.name}>
+                  {category.label}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="formGroup">
-            <label htmlFor="estado">Estado</label>
+            <label>Idioma</label>
+            <input name="language" value={formData.language} onChange={handleChange} />
+          </div>
+
+          <div className="formGroup fullWidth">
+            <label>Descripción</label>
+            <textarea
+              name="description"
+              rows="4"
+              value={formData.description}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="formGroup">
+            <label>URL portada</label>
+            <input name="coverUrl" value={formData.coverUrl} onChange={handleChange} />
+          </div>
+
+          <div className="formGroup">
+            <label>URL PDF</label>
+            <input name="pdfUrl" value={formData.pdfUrl} onChange={handleChange} required />
+          </div>
+
+          <div className="formGroup">
+            <label>Nombre PDF</label>
+            <input name="pdfFileName" value={formData.pdfFileName} onChange={handleChange} />
+          </div>
+
+          <div className="formGroup">
+            <label>Tamaño PDF</label>
+            <input
+              name="pdfFileSize"
+              type="number"
+              value={formData.pdfFileSize}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="formGroup">
+            <label>Total páginas</label>
+            <input
+              name="totalPages"
+              type="number"
+              value={formData.totalPages}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="formGroup">
+            <label>Estado</label>
             <select
-              id="estado"
-              name="estado"
-              value={formData.estado}
+              name="currentStatus"
+              value={formData.currentStatus}
               onChange={handleChange}
             >
-              <option value="Publicado">Publicado</option>
-              <option value="Borrador">Borrador</option>
+              <option value="activo">activo</option>
+              <option value="inactivo">inactivo</option>
             </select>
           </div>
 
           <div className="formGroup fullWidth">
-            <label htmlFor="descripcion">Descripción</label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              rows="5"
-              value={formData.descripcion}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="formGroup">
-            <label htmlFor="portada">Portada</label>
-            <input
-              id="portada"
-              name="portada"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </div>
-
-          <div className="formGroup">
-            <label htmlFor="pdf">Archivo PDF</label>
-            <input
-              id="pdf"
-              name="pdf"
-              type="file"
-              accept="application/pdf"
-              onChange={handleFileChange}
-            />
+            <label>
+              <input
+                type="checkbox"
+                name="isPublic"
+                checked={formData.isPublic}
+                onChange={handleChange}
+              />
+              Público
+            </label>
           </div>
 
           <div className="formActions">
@@ -156,7 +205,6 @@ export default function FormLibroPage() {
             >
               Cancelar
             </button>
-
             <button type="submit" className="primaryButton">
               {modoEdicion ? "Guardar cambios" : "Guardar libro"}
             </button>

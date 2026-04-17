@@ -1,17 +1,15 @@
 const SUBSCRIPTION_KEY = "b23b54a59f4f449eb64d507b55ea93e3";
-const API_BASE_URL = "https://librosapi.azure-api.net/v1/books";
+const API_BASE_URL = "https://librosapi.azure-api.net/v1";
 
 const defaultHeaders = {
   "Content-Type": "application/json",
-  "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
+  "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
 };
 
-export async function getBooks() {
-  const response = await fetch(API_BASE_URL, {
-    method: "GET",
-    headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
-    }
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: defaultHeaders,
+    ...options,
   });
 
   if (!response.ok) {
@@ -21,60 +19,111 @@ export async function getBooks() {
   return response.json();
 }
 
-export async function getBookById(id) {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+export function getUsers() {
+  return apiRequest("/users", {
     method: "GET",
     headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
-    }
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
   });
-
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
 }
 
-export async function createBook(book) {
-  const response = await fetch(API_BASE_URL, {
+export function getUserById(id) {
+  return apiRequest(`/users/${id}`, {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function createUser(user) {
+  return apiRequest("/users", {
     method: "POST",
-    headers: defaultHeaders,
-    body: JSON.stringify(book)
+    body: JSON.stringify(user),
   });
-
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
 }
 
-export async function updateBook(id, book) {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+export function updateUser(id, user) {
+  return apiRequest(`/users/${id}`, {
     method: "PUT",
-    headers: defaultHeaders,
-    body: JSON.stringify(book)
+    body: JSON.stringify(user),
   });
-
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
 }
 
-export async function deleteBook(id) {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+export function deleteUser(id) {
+  return apiRequest(`/users/${id}`, {
     method: "DELETE",
     headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY
-    }
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
   });
+}
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
+export function getCategories() {
+  return apiRequest("/categories", {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
 
-  return response.json();
+export function getBooks() {
+  return apiRequest("/books", {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function getBookById(id) {
+  return apiRequest(`/books/${id}`, {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function createBook(book) {
+  return apiRequest("/books", {
+    method: "POST",
+    body: JSON.stringify(book),
+  });
+}
+
+export function updateBook(id, book) {
+  return apiRequest(`/books/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(book),
+  });
+}
+
+export function deleteBook(id) {
+  return apiRequest(`/books/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function getReadingProgress() {
+  return apiRequest("/reading-progress", {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
+}
+
+export function getFavorites() {
+  return apiRequest("/favorites", {
+    method: "GET",
+    headers: {
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+  });
 }
