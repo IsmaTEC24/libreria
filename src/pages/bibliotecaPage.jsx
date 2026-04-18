@@ -12,39 +12,69 @@ export default function BibliotecaPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const librosUsuario = useMemo(() => {
-    return books.filter((book) => book.userId === currentUser?.id);
+  const userBooks = useMemo(() => {
+    if (!currentUser) return [];
+    return books.filter((book) => book.userId === currentUser.id);
   }, [books, currentUser]);
 
   const filteredBooks = useMemo(() => {
-    return librosUsuario.filter((book) => {
-      const searchMatch =
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase());
+    return userBooks.filter((book) => {
+      const matchesSearch =
+        (book.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (book.author || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-      const categoryMatch =
+      const matchesCategory =
         selectedCategory === "all" || book.category === selectedCategory;
 
-      return searchMatch && categoryMatch;
+      return matchesSearch && matchesCategory;
     });
-  }, [librosUsuario, searchTerm, selectedCategory]);
+  }, [userBooks, searchTerm, selectedCategory]);
 
-  if (!currentUser) return <p>Debes iniciar sesión.</p>;
-  if (loading) return <p>Cargando biblioteca...</p>;
-  if (error) return <p>{error}</p>;
+  if (!currentUser) {
+    return (
+      <section className="bibliotecaPage">
+        <div className="sectionHeader">
+          <h1>Biblioteca</h1>
+          <p>Debes iniciar sesión.</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (loading) {
+    return (
+      <section className="bibliotecaPage">
+        <div className="sectionHeader">
+          <h1>Biblioteca</h1>
+          <p>Cargando libros...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="bibliotecaPage">
+        <div className="sectionHeader">
+          <h1>Biblioteca</h1>
+          <p>{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bibliotecaPage">
       <div className="sectionHeader">
         <h1>Biblioteca</h1>
-        <p>Explora todos tus libros.</p>
+        <p>Explora los libros asociados a tu cuenta.</p>
       </div>
 
       <div className="adminToolbar">
         <input
           type="text"
-          placeholder="Buscar por título o autor..."
           className="searchInput adminSearch"
+          placeholder="Buscar por título o autor..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -63,22 +93,31 @@ export default function BibliotecaPage() {
         </select>
       </div>
 
-      <div className="booksGrid">
-        {filteredBooks.map((book) => (
-          <div
-            key={book.id}
-            onClick={() =>
-              navigate("/detalle-libro", { state: { libroId: book.id } })
-            }
-          >
-            <BookCard
-              titulo={book.title}
-              autor={book.author}
-              portada={book.coverUrl || "/assets/defaultBook.png"}
-            />
-          </div>
-        ))}
-      </div>
+      {filteredBooks.length === 0 ? (
+        <div className="emptyState">
+          <p>No hay libros para mostrar.</p>
+        </div>
+      ) : (
+        <div className="booksGrid">
+          {filteredBooks.map((book) => (
+            <div
+              key={book.id}
+              onClick={() =>
+                navigate("/detalle-libro", {
+                  state: { libroId: book.id },
+                })
+              }
+              style={{ cursor: "pointer" }}
+            >
+              <BookCard
+                titulo={book.title}
+                autor={book.author}
+                portada={book.coverUrl || "/assets/defaultBook.png"}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
