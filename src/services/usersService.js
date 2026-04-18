@@ -50,18 +50,17 @@ export async function createUser(user) {
   return response.json();
 }
 
-export function updateUser(id, user) {
+export async function updateUser(id, user) {
   return apiRequest(`/users/${id}`, {
     method: "PUT",
     body: JSON.stringify(user),
   });
 }
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
+export async function getUserById(id) {
+  return apiRequest(`/users/${id}`, {
+    method: "GET",
+  });
 }
 
 export async function deleteUser(id) {
