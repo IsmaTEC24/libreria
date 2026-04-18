@@ -1,9 +1,9 @@
-
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -14,7 +14,8 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export default function LecturaPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { books, readingProgress, loading, error } = useAppData();
+  const { currentUser } = useAuth();
+  const { books, loading, error } = useAppData();
 
   const libroId = location.state?.libroId || 1;
 
@@ -22,28 +23,89 @@ export default function LecturaPage() {
     return books.find((item) => item.id === libroId);
   }, [books, libroId]);
 
-  const progresoLibro = useMemo(() => {
-    return readingProgress.find((item) => item.bookId === libroId) || null;
-  }, [readingProgress, libroId]);
+  function getProgressKey() {
+    return `reading-progress-${currentUser?.id}-${libroId}`;
+  }
+
+  function cargarProgresoLocal() {
+    const saved = localStorage.getItem(getProgressKey());
+    if (!saved) return null;
+
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return null;
+    }
+  }
+
+  const progresoGuardado = cargarProgresoLocal();
+  const paginaInicial = progresoGuardado?.currentPage || 1;
 
   const [numPages, setNumPages] = useState(0);
-  const [pageNumber, setPageNumber] = useState(progresoLibro?.currentPage || 1);
-  const [scale, setScale] = useState(1.2);
+  const [pageNumber, setPageNumber] = useState(paginaInicial);
+  const [savedPage, setSavedPage] = useState(paginaInicial);
+  const [scale, setScale] = useState(1.15);
+  const [darkMode, setDarkMode] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
+  const hasUnsavedChanges = pageNumber !== savedPage;
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (!hasUnsavedChanges) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
 
     if (pageNumber > numPages) {
       setPageNumber(1);
+      setSavedPage(1);
     }
   }
 
   function irPaginaAnterior() {
     setPageNumber((prev) => Math.max(prev - 1, 1));
+    setSaveMessage("");
   }
 
   function irPaginaSiguiente() {
     setPageNumber((prev) => Math.min(prev + 1, numPages));
+    setSaveMessage("");
+  }
+
+  function guardarProgresoLocal() {
+    const percentage = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
+
+    const data = {
+      userId: currentUser?.id,
+      bookId: libroId,
+      currentPage: pageNumber,
+      percentage,
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(getProgressKey(), JSON.stringify(data));
+    setSavedPage(pageNumber);
+    setSaveMessage(`Progreso guardado en la página ${pageNumber}.`);
+  }
+
+  function handleVolver() {
+    if (hasUnsavedChanges) {
+      const confirmarSalida = window.confirm(
+        "Tienes cambios sin guardar. Si sales ahora, perderás el progreso no guardado. ¿Deseas salir?"
+      );
+
+      if (!confirmarSalida) return;
+    }
+
+    navigate("/detalle-libro", { state: { libroId: book.id } });
   }
 
   const progreso = numPages ? (pageNumber / numPages) * 100 : 0;
@@ -54,16 +116,11 @@ export default function LecturaPage() {
   if (!book.pdfUrl) return <p>Este libro no tiene PDF disponible.</p>;
 
   return (
-    <section className="lecturaPage">
+    <section className={`lecturaPage ${darkMode ? "lecturaPageDark" : ""}`}>
       <div className="readingWrapper">
         <header className="readingHeader">
           <div className="readingHeaderLeft">
-            <button
-              className="backButton"
-              onClick={() =>
-                navigate("/detalle-libro", { state: { libroId: book.id } })
-              }
-            >
+            <button className="backButton" onClick={handleVolver}>
               ← Volver al detalle
             </button>
 
@@ -81,11 +138,23 @@ export default function LecturaPage() {
             >
               Zoom -
             </button>
+
             <button
               className="toolButton"
               onClick={() => setScale((prev) => Math.min(prev + 0.1, 2))}
             >
               Zoom +
+            </button>
+
+            <button
+              className="toolButton"
+              onClick={() => setDarkMode((prev) => !prev)}
+            >
+              {darkMode ? "☀ Claro" : "🌙 Oscuro"}
+            </button>
+
+            <button className="primaryButton" onClick={guardarProgresoLocal}>
+              Guardar progreso
             </button>
           </div>
         </header>
@@ -102,9 +171,15 @@ export default function LecturaPage() {
             Página {pageNumber} de {numPages || "..."} • {Math.round(progreso)}%
             completado
           </p>
+
+          {hasUnsavedChanges && (
+            <p className="unsavedWarning">Tienes cambios sin guardar.</p>
+          )}
+
+          {saveMessage && <p className="saveMessage">{saveMessage}</p>}
         </div>
 
-        <div className="readingPdfContainer">
+        <div className={`readingPdfContainer ${darkMode ? "pdfDarkMode" : ""}`}>
           <Document
             file={book.pdfUrl}
             onLoadSuccess={onDocumentLoadSuccess}

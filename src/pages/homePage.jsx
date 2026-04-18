@@ -73,7 +73,7 @@ export default function HomePage() {
 
             <button
               className="secondaryButton"
-              onClick={() => navigate("/mi-biblioteca")}
+              onClick={() => navigate("/favoritos")}
             >
               Ver favoritos
             </button>

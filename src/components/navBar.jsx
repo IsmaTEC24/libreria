@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext.jsx";
 
 export default function Navbar() {
+
   const navigate = useNavigate();
   const { currentUser, logout, isAuthenticated } = useAuth();
 
@@ -10,68 +11,77 @@ export default function Navbar() {
     navigate("/login");
   }
 
-  function goHome() {
-    navigate("/");
+  function getInitials(name = "") {
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(word => word[0]?.toUpperCase())
+      .join("");
   }
 
   return (
     <header className="navbar">
-      <div onClick={goHome} style={{ cursor: "pointer" }}>
+
+      <div
+        onClick={() => navigate("/home")}
+        style={{ cursor: "pointer" }}
+      >
         <h1 className="navbarTitle">ReadFlow</h1>
+
         <p className="navbarSubtitle">
-          {isAuthenticated
-            ? `Bienvenido, ${currentUser.name}`
-            : "Tu biblioteca digital personal"}
+          Bienvenido, {currentUser?.name}
         </p>
       </div>
 
-      <div className="navbarActions">
-        <input
-          type="text"
-          placeholder="Buscar libros, autores o categorías..."
-          className="searchInput"
-        />
+      {isAuthenticated && (
 
-        {isAuthenticated ? (
-          <>
-            <button
-              className="secondaryButton"
-              onClick={() => navigate("/")}
-            >
-              Inicio
-            </button>
+        <div className="navbarActions">
 
-            <button
-              className="secondaryButton"
-              onClick={() => navigate("/biblioteca")}
-            >
-              Biblioteca
-            </button>
-
-            <button
-              className="secondaryButton"
-              onClick={() => navigate("/mi-biblioteca")}
-            >
-              Favoritos
-            </button>
-
-            <button
-              className="themeButton"
-              onClick={() => navigate("/perfil")}
-            >
-              👤
-            </button>
-
-            <button className="secondaryButton" onClick={handleLogout}>
-              Salir
-            </button>
-          </>
-        ) : (
-          <button className="primaryButton" onClick={() => navigate("/login")}>
-            Login
+          <button
+            className="secondaryButton"
+            onClick={() => navigate("/home")}
+          >
+            Inicio
           </button>
-        )}
-      </div>
+
+          <button
+            className="secondaryButton"
+            onClick={() => navigate("/biblioteca")}
+          >
+            Biblioteca
+          </button>
+
+          <button
+            className="secondaryButton"
+            onClick={() => navigate("/favoritos")}
+          >
+            Favoritos
+          </button>
+
+          <button
+            className="userProfileButton"
+            onClick={() => navigate("/perfil")}
+          >
+            <span className="userIcon">👤</span>
+
+            <span className="userInitials">
+              {getInitials(currentUser?.name)}
+            </span>
+
+          </button>
+
+          <button
+            className="secondaryButton"
+            onClick={handleLogout}
+          >
+            Salir
+          </button>
+
+        </div>
+
+      )}
+
     </header>
   );
 }

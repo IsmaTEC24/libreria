@@ -1,46 +1,108 @@
-import { Routes, Route } from "react-router-dom";
-import MainLayout from "./layout/mainLayout.jsx";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import HomePage from "./pages/homePage.jsx";
-import BibliotecaPage from "./pages/bibliotecaPage.jsx";
-import LecturaPage from "./pages/lecturaPage.jsx";
-import AdminLibrosPage from "./pages/adminLibrosPage.jsx";
-import ConfiguracionPage from "./pages/configuracionPage.jsx";
-import FormLibroPage from "./pages/formLibroPage.jsx";
-import DetalleLibroPage from "./pages/detalleLibroPage.jsx";
-import LoginPage from "./pages/loginPage.jsx";
-import RegistroPage from "./pages/registroPage.jsx";
-import PerfilPage from "./pages/perfilPage.jsx";
-import MiBibliotecaPage from "./pages/miBibliotecaPage.jsx";
-import BooksPage from "./peticiones_Azure/BooksPage.jsx";
-import UsersPage from "./peticiones_Azure/UsersPage.jsx";
+import Navbar from "./components/Navbar.jsx";
 
+import HomePage from "./pages/HomePage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import BibliotecaPage from "./pages/BibliotecaPage.jsx";
+import FavoritosPage from "./pages/FavoritosPage.jsx";
+import PerfilPage from "./pages/PerfilPage.jsx";
+import DetalleLibroPage from "./pages/DetalleLibroPage.jsx";
+import LecturaPage from "./pages/LecturaPage.jsx";
 
+import { useAuth } from "./context/authContext.jsx";
 
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/registro" element={<RegistroPage />} />
 
-      <Route path="/" element={<MainLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="biblioteca" element={<BibliotecaPage />} />
-        <Route path="libros" element={<BooksPage />} />
-        <Route path="usuarios" element={<UsersPage />} />
-        <Route path="mi-biblioteca" element={<MiBibliotecaPage />} />
-        <Route path="lectura" element={<LecturaPage />} />
-        <Route path="admin-libros" element={<AdminLibrosPage />} />
-        <Route path="configuracion" element={<ConfiguracionPage />} />
-        <Route path="nuevo-libro" element={<FormLibroPage />} />
-        <Route path="editar-libro" element={<FormLibroPage />} />
-        <Route path="detalle-libro" element={<DetalleLibroPage />} />
-        <Route path="perfil" element={<PerfilPage />} />
-      </Route>
-    </Routes>
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <div className="appShell">
+
+      {/* navbar solo si hay usuario logueado */}
+      {isAuthenticated && <Navbar />}
+
+      <main className="mainContent">
+
+        <Routes>
+
+          {/* ruta inicial */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated
+                ? <Navigate to="/home" />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* login */}
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* home */}
+          <Route
+            path="/home"
+            element={
+              isAuthenticated
+                ? <HomePage />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* biblioteca */}
+          <Route
+            path="/biblioteca"
+            element={
+              isAuthenticated
+                ? <BibliotecaPage />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* favoritos */}
+          <Route
+            path="/favoritos"
+            element={
+              isAuthenticated
+                ? <FavoritosPage />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* perfil usuario */}
+          <Route
+            path="/perfil"
+            element={
+              isAuthenticated
+                ? <PerfilPage />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* detalle libro */}
+          <Route
+            path="/detalle-libro"
+            element={
+              isAuthenticated
+                ? <DetalleLibroPage />
+                : <Navigate to="/login" />
+            }
+          />
+
+          {/* lector pdf */}
+          <Route
+            path="/lectura"
+            element={
+              isAuthenticated
+                ? <LecturaPage />
+                : <Navigate to="/login" />
+            }
+          />
+
+        </Routes>
+
+      </main>
+
+    </div>
   );
 }
-
-
-
-

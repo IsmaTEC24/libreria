@@ -1,57 +1,114 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
 
 export default function PerfilPage() {
   const { currentUser } = useAuth();
-  const { books, favorites, readingProgress, loading, error } = useAppData();
+  const [isEditing, setIsEditing] = useState(false);
 
-  const totalBooks = useMemo(() => {
-    if (!currentUser) return 0;
-    return books.filter((book) => book.userId === currentUser.id).length;
-  }, [books, currentUser]);
+  const [formData, setFormData] = useState({
+    name: currentUser?.name || "",
+    email: currentUser?.email || "",
+    role: currentUser?.role || "Lector",
+  });
 
-  const totalFavorites = useMemo(() => {
-    if (!currentUser) return 0;
-    return favorites.filter((fav) => fav.userId === currentUser.id).length;
-  }, [favorites, currentUser]);
+  if (!currentUser) return <p>No hay usuario autenticado.</p>;
 
-  const totalReading = useMemo(() => {
-    if (!currentUser) return 0;
-    return readingProgress.filter((item) => item.userId === currentUser.id).length;
-  }, [readingProgress, currentUser]);
+  function getInitials(name = "") {
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase())
+      .join("");
+  }
 
-  if (!currentUser) return <p>Debes iniciar sesión para ver tu perfil.</p>;
-  if (loading) return <p>Cargando perfil...</p>;
-  if (error) return <p>{error}</p>;
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+
+  function handleSave() {
+    setIsEditing(false);
+  }
+
+  function handleCancel() {
+    setFormData({
+      name: currentUser?.name || "",
+      email: currentUser?.email || "",
+      role: currentUser?.role || "Lector",
+    });
+    setIsEditing(false);
+  }
 
   return (
     <section className="perfilPage">
       <div className="perfilCard">
         <div className="perfilHeader">
-          <div className="perfilAvatar">{currentUser.initials}</div>
+          <div className="perfilAvatar">{getInitials(formData.name)}</div>
 
-          <div>
-            <h1>{currentUser.name}</h1>
-            <p>{currentUser.email}</p>
-            <span className="heroBadge">@{currentUser.username}</span>
+          <div className="perfilHeaderInfo">
+            <h1>{formData.name}</h1>
+            <p>{formData.email}</p>
           </div>
+
+          {!isEditing ? (
+            <button className="primaryButton" onClick={() => setIsEditing(true)}>
+              Editar perfil
+            </button>
+          ) : (
+            <div className="perfilActions">
+              <button className="primaryButton" onClick={handleSave}>
+                Guardar
+              </button>
+              <button className="secondaryButton" onClick={handleCancel}>
+                Cancelar
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="perfilStats">
-          <div className="statBox">
-            <h3>{totalBooks}</h3>
-            <p>Libros</p>
+        <div className="perfilGrid">
+          <div className="perfilField">
+            <label>Nombre</label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            ) : (
+              <p>{formData.name}</p>
+            )}
           </div>
 
-          <div className="statBox">
-            <h3>{totalFavorites}</h3>
-            <p>Favoritos</p>
+          <div className="perfilField">
+            <label>Correo</label>
+            {isEditing ? (
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            ) : (
+              <p>{formData.email}</p>
+            )}
           </div>
 
-          <div className="statBox">
-            <h3>{totalReading}</h3>
-            <p>En lectura</p>
+          <div className="perfilField">
+            <label>Rol</label>
+            {isEditing ? (
+              <select name="role" value={formData.role} onChange={handleChange}>
+                <option value="Lector">Lector</option>
+                <option value="Administrador">Administrador</option>
+              </select>
+            ) : (
+              <p>{formData.role}</p>
+            )}
           </div>
         </div>
       </div>
