@@ -2,13 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar.jsx";
 
-import HomePage from "./pages/HomePage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import BibliotecaPage from "./pages/BibliotecaPage.jsx";
-import FavoritosPage from "./pages/FavoritosPage.jsx";
-import PerfilPage from "./pages/PerfilPage.jsx";
-import DetalleLibroPage from "./pages/DetalleLibroPage.jsx";
-import LecturaPage from "./pages/LecturaPage.jsx";
+import HomePage from "./pages/homePage.jsx";
+import LoginPage from "./pages/loginPage.jsx";
+import BibliotecaPage from "./pages/bibliotecaPage.jsx";
+import FavoritosPage from "./pages/favoritosPage.jsx";
+import PerfilPage from "./pages/rerfilPage.jsx";
+import DetalleLibroPage from "./pages/detalleLibroPage.jsx";
+import LecturaPage from "./pages/lecturaPage.jsx";
 
 import { useAuth } from "./context/authContext.jsx";
 
