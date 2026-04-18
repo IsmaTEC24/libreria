@@ -10,17 +10,31 @@ const authHeaders = {
   "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
 };
 
+async function handleResponse(response) {
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`Error HTTP: ${response.status} - ${text}`);
+  }
+
+  if (!text) return null;
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
 export async function getUsers() {
   const response = await fetch(API_BASE_URL, {
     method: "GET",
     headers: authHeaders,
   });
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
+  const data = await handleResponse(response);
+  console.log("getUsers response:", data);
+  return data;
 }
 
 export async function getUserById(id) {
@@ -29,11 +43,9 @@ export async function getUserById(id) {
     headers: authHeaders,
   });
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
+  const data = await handleResponse(response);
+  console.log("getUserById response:", data);
+  return data;
 }
 
 export async function createUser(user) {
@@ -43,25 +55,17 @@ export async function createUser(user) {
     body: JSON.stringify(user),
   });
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function updateUser(id, user) {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "PUT",
     headers: jsonHeaders,
-    body: JSON.stringify(user)
+    body: JSON.stringify(user),
   });
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  return response.json();
+  return handleResponse(response);
 }
 
 export async function deleteUser(id) {
@@ -70,13 +74,5 @@ export async function deleteUser(id) {
     headers: authHeaders,
   });
 
-  if (!response.ok) {
-    throw new Error(`Error HTTP: ${response.status}`);
-  }
-
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
+  return handleResponse(response);
 }
