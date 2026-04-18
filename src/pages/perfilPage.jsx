@@ -3,7 +3,7 @@ import { useAuth } from "../context/authContext.jsx";
 import { updateUser } from "../services/usersService.js";
 
 export default function PerfilPage() {
-  const { currentUser, refreshCurrentUser } = useAuth();
+  const { currentUser, updateCurrentUserLocally } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -35,6 +35,7 @@ export default function PerfilPage() {
 
   function handleChange(event) {
     const { name, value } = event.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -50,7 +51,7 @@ export default function PerfilPage() {
       };
 
       await updateUser(currentUser.id, payload);
-      await refreshCurrentUser();
+      updateCurrentUserLocally(payload);
 
       setSaveMessage("Perfil actualizado correctamente.");
       setIsEditing(false);
@@ -65,6 +66,7 @@ export default function PerfilPage() {
       name: currentUser.name || "",
       email: currentUser.email || "",
     });
+
     setSaveMessage("");
     setIsEditing(false);
   }
@@ -83,7 +85,13 @@ export default function PerfilPage() {
           </div>
 
           {!isEditing ? (
-            <button className="primaryButton" onClick={() => setIsEditing(true)}>
+            <button
+              className="primaryButton"
+              onClick={() => {
+                setIsEditing(true);
+                setSaveMessage("");
+              }}
+            >
               Editar perfil
             </button>
           ) : (
@@ -91,6 +99,7 @@ export default function PerfilPage() {
               <button className="primaryButton" onClick={handleSaveProfile}>
                 Guardar
               </button>
+
               <button className="secondaryButton" onClick={handleCancel}>
                 Cancelar
               </button>

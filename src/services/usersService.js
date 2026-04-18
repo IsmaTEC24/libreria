@@ -54,7 +54,7 @@ export async function updateUser(id, user) {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "PUT",
     headers: jsonHeaders,
-    body: JSON.stringify(user),
+    body: JSON.stringify(user)
   });
 
   if (!response.ok) {
