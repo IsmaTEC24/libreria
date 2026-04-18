@@ -6,7 +6,7 @@ import HomePage from "./pages/homePage.jsx";
 import LoginPage from "./pages/loginPage.jsx";
 import BibliotecaPage from "./pages/bibliotecaPage.jsx";
 import FavoritosPage from "./pages/favoritosPage.jsx";
-import PerfilPage from "./pages/rerfilPage.jsx";
+import PerfilPage from "./pages/perfilPage.jsx";
 import DetalleLibroPage from "./pages/detalleLibroPage.jsx";
 import LecturaPage from "./pages/lecturaPage.jsx";
 
