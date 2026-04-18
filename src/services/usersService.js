@@ -51,17 +51,15 @@ export async function createUser(user) {
 }
 
 export async function updateUser(id, user) {
-  return apiRequest(`/users/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: "PUT",
-    body: JSON.stringify(user),
+    headers: authHeaders,
+    body: JSON.stringify(user)
   });
+
+  return handleResponse(response);
 }
 
-export async function getUserById(id) {
-  return apiRequest(`/users/${id}`, {
-    method: "GET",
-  });
-}
 
 export async function deleteUser(id) {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
