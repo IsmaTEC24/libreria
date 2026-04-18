@@ -2,6 +2,11 @@
 
 ReadFlow Web es la aplicación web del ecosistema ReadFlow, diseñada para la gestión y lectura de libros digitales desde el navegador. Esta versión complementa a la aplicación móvil y comparte la misma lógica de consumo de datos mediante Azure API Management, ofreciendo una experiencia organizada, visual y accesible para explorar la biblioteca, administrar libros y continuar lecturas.
 
+## 🔗 Enlaces del proyecto
+
+- **Aplicación web desplegada:** https://brave-sea-03b672010.2.azurestaticapps.net
+- **Repositorio de la aplicación móvil:** https://github.com/Viktor1712/DesignReadAppProject
+
 ## 🚀 Características Principales
 
 - **Biblioteca Digital:** Visualiza libros disponibles con su portada, autor, categoría y metadatos principales.
@@ -24,12 +29,3 @@ El proyecto fue construido con tecnologías modernas de frontend web:
 - **Backend/API:** Azure API Management
 - **Hosting:** Azure Static Web Apps
 - **CI/CD:** GitHub Actions
-
-## 🧩 Lógica del Proyecto
-
-### 1. Conectividad con la API de Azure
-
-La aplicación se comunica con:
-
-```text
-https://librosapi.azure-api.net/v1/
