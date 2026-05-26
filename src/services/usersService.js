@@ -1,5 +1,5 @@
-const SUBSCRIPTION_KEY = "b23b54a59f4f449eb64d507b55ea93e3";
-const API_BASE_URL = "https://librosapi.azure-api.net/v1/books";
+const SUBSCRIPTION_KEY = import.meta.env.VITE_API_SUBSCRIPTION_KEY;
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/users`;
 
 const jsonHeaders = {
   "Content-Type": "application/json",
