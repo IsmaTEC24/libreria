@@ -11,10 +11,10 @@ export default function MiBibliotecaPage() {
 
   const favoritosUsuario = useMemo(() => {
     const favoritosIds = favorites
-      .filter((fav) => fav.userId === currentUser?.id)
-      .map((fav) => fav.bookId);
+      .filter((fav) => String(fav.userId) === String(currentUser?.id))
+      .map((fav) => String(fav.bookId));
 
-    return books.filter((book) => favoritosIds.includes(book.id));
+    return books.filter((book) => favoritosIds.includes(String(book.id)));
   }, [favorites, books, currentUser]);
 
   if (!currentUser) return <p>Debes iniciar sesión.</p>;

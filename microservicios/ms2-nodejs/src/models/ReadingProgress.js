@@ -21,4 +21,6 @@ const readingProgressSchema = new mongoose.Schema(
   }
 );
 
+readingProgressSchema.index({ userId: 1, bookId: 1 }, { unique: true });
+
 module.exports = mongoose.model("ReadingProgress", readingProgressSchema);

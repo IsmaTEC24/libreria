@@ -79,13 +79,13 @@ export default function LecturaPage() {
   }
 
   async function guardarProgreso() {
+    if (!currentUser) return;
     const percentage = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
     const data = {
-      userId: currentUser?.id,
+      userId: currentUser.id,
       bookId: libroId,
       currentPage: pageNumber,
       percentage,
-      updatedAt: new Date().toISOString(),
     };
 
     try {
