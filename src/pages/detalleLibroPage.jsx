@@ -43,7 +43,7 @@ export default function DetalleLibroPage() {
   });
 
   async function toggleFavorito() {
-    if (!book) return;
+    if (!book || !currentUser) return;
     try {
       if (esFavorito) {
         await deleteFavorite(favoritoActual.id);
