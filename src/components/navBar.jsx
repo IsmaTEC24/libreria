@@ -32,7 +32,7 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <div onClick={() => navigate("/home")} style={{ cursor: "pointer" }}>
-        <h1 className="navbarTitle">ReadFlow</h1>
+        <h1 className="navbarTitle">ReadFlow - Biblioteca</h1>
         <p className="navbarSubtitle">
           Bienvenido, {currentUser?.name}
         </p>
