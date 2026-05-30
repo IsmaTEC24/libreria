@@ -90,17 +90,25 @@ export function getBookById(id) {
   });
 }
 
-export function createBook(book) {
-  return apiRequest("/books", {
+export function createBook(formData) {
+  return fetch(`${API_BASE_URL}/books`, {
     method: "POST",
-    body: JSON.stringify(book),
+    headers: { "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY },
+    body: formData,
+  }).then((r) => {
+    if (!r.ok) throw new Error(`Error HTTP: ${r.status}`);
+    return r.json();
   });
 }
 
-export function updateBook(id, book) {
-  return apiRequest(`/books/${id}`, {
+export function updateBook(id, formData) {
+  return fetch(`${API_BASE_URL}/books/${id}`, {
     method: "PUT",
-    body: JSON.stringify(book),
+    headers: { "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY },
+    body: formData,
+  }).then((r) => {
+    if (!r.ok) throw new Error(`Error HTTP: ${r.status}`);
+    return r.json();
   });
 }
 
