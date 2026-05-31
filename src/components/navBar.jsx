@@ -69,6 +69,13 @@ export default function Navbar() {
           </button>
 
           <button
+            className="secondaryButton"
+            onClick={() => navigate("/admin-libros")}
+          >
+            Admin
+          </button>
+
+          <button
             className="userProfileButton"
             onClick={() => navigate("/perfil")}
           >
