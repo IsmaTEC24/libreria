@@ -38,10 +38,16 @@ export default function App() {
           />
 
           {/* login */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/home" /> : <LoginPage />}
+          />
 
           {/* registro */}
-          <Route path="/registro" element={<RegistroPage />} />
+          <Route
+            path="/registro"
+            element={isAuthenticated ? <Navigate to="/home" /> : <RegistroPage />}
+          />
 
           {/* home */}
           <Route
