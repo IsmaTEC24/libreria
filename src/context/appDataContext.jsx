@@ -61,9 +61,13 @@ export function AppDataProvider({ children }) {
         }));
       };
 
+      const normalizedBooks = normalizeBooks(val(booksRes));
+      console.log("Books from API:", val(booksRes));
+      console.log("Normalized books:", normalizedBooks);
+
       setUsers(val(usersRes));
       setCategories(val(categoriesRes));
-      setBooks(normalizeBooks(val(booksRes)));
+      setBooks(normalizedBooks);
       setReadingProgress(normalizeProgress(val(progressRes)));
       setFavorites(normalizeFavorites(val(favoritesRes)));
     } catch (err) {
