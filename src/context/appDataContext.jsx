@@ -6,12 +6,10 @@ import {
   getReadingProgress,
   getFavorites,
 } from "../services/booksService.js";
-import { useAuth } from "./authContext.jsx";
 
 const AppDataContext = createContext();
 
 export function AppDataProvider({ children }) {
-  const { currentUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
@@ -26,15 +24,13 @@ export function AppDataProvider({ children }) {
       setLoading(true);
       setError("");
 
-      const userId = currentUser?.id || null;
-
       const [usersRes, categoriesRes, booksRes, progressRes, favoritesRes] =
         await Promise.allSettled([
           getUsers(),
           getCategories(),
           getBooks(),
-          getReadingProgress(userId),
-          getFavorites(userId),
+          getReadingProgress(),
+          getFavorites(),
         ]);
 
       const val = (r) => (r.status === "fulfilled" && Array.isArray(r.value) ? r.value : []);
@@ -84,7 +80,7 @@ export function AppDataProvider({ children }) {
 
   useEffect(() => {
     loadAppData();
-  }, [currentUser?.id]);
+  }, []);
 
   return (
     <AppDataContext.Provider

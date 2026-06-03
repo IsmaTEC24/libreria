@@ -2,9 +2,7 @@ const Favorite = require("../models/Favorite");
 
 async function getAll(req, res) {
   try {
-    const { userId } = req.query;
-    if (!userId) return res.json([]);
-    const favorites = await Favorite.find({ userId });
+    const favorites = await Favorite.find();
     res.json(favorites);
   } catch (error) {
     res.status(500).json({ message: error.message });
