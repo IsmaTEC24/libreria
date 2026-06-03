@@ -60,11 +60,24 @@ export function deleteUser(id) {
 /* CATEGORIES - Mock data (hardcoded, not connected to API) */
 export async function getCategories() {
   return [
-    { id: 1, name: "General" },
-    { id: 2, name: "Matemática" },
-    { id: 3, name: "Programación" },
-    { id: 4, name: "Administración" },
-    { id: 5, name: "Inglés" },
+    { id: 1, name: "Clásicos universales" },
+    { id: 2, name: "Literatura latinoamericana" },
+    { id: 3, name: "Realismo mágico" },
+    { id: 4, name: "Novela psicológica" },
+    { id: 5, name: "Ciencia ficción" },
+    { id: 6, name: "Distopía" },
+    { id: 7, name: "Crítica social y política" },
+    { id: 8, name: "Teatro" },
+    { id: 9, name: "Tragedia" },
+    { id: 10, name: "Épica" },
+    { id: 11, name: "Mitología" },
+    { id: 12, name: "Fantasía filosófica" },
+    { id: 13, name: "Terror gótico" },
+    { id: 14, name: "Romance" },
+    { id: 15, name: "Novela experimental" },
+    { id: 16, name: "Existencialismo" },
+    { id: 17, name: "Novela histórica" },
+    { id: 18, name: "Contexto social" }
   ];
 }
 
