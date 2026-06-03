@@ -36,4 +36,11 @@ public class JpaCategoryRepositoryAdapter implements CategoryRepositoryPort {
             .collect(Collectors.toList());
         jpaRepository.saveAll(entities);
     }
+
+    @Override
+    public Category save(Category category) {
+        CategoryJpaEntity entity = new CategoryJpaEntity(category.getId(), category.getName(), category.getLabel());
+        CategoryJpaEntity saved = jpaRepository.save(entity);
+        return new Category(saved.getId(), saved.getName(), saved.getLabel());
+    }
 }
