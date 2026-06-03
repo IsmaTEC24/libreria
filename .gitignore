@@ -24,3 +24,10 @@ readflow-backend/
 *.njsproj
 *.sln
 *.sw?
+
+# Archivos de deploy (no deben estar en git)
+*.zip
+*.jar
+deploy-*/
+deploy-final/
+
