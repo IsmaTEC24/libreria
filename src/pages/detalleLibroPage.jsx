@@ -6,7 +6,7 @@ import {
   updateBook,
   createFavorite,
   deleteFavorite,
-  getBookCoverUrl,
+  deleteBook,
 } from "../services/booksService.js";
 
 export default function DetalleLibroPage() {
@@ -34,6 +34,24 @@ const book = useMemo(() => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+
+  const currentUserId =
+    currentUser?.id ||
+    currentUser?.userId ||
+    currentUser?.user_id ||
+    currentUser?.uid ||
+    null;
+
+  const bookOwnerId =
+    book?.user_id ||
+    book?.userId ||
+    book?.uploaded_by ||
+    book?.uploadedBy ||
+    null;
+
+  const esDuenoDelLibro =
+    currentUserId && bookOwnerId && String(currentUserId) === String(bookOwnerId);
+
   const [coverUrl, setCoverUrl] = useState("");
 
 const uploadedByName = useMemo(() => {
@@ -165,6 +183,34 @@ useEffect(() => {
 
     setIsEditing(false);
     setSaveMessage("");
+  }
+
+  async function handleDeleteBook() {
+    if (!book) return;
+
+    if (!esDuenoDelLibro) {
+      alert("No tienes permiso para eliminar este libro.");
+      return;
+    }
+
+    const confirmar = window.confirm(
+      `¿Seguro que deseas eliminar "${book.title}"? Esta acción no se puede deshacer.`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await deleteBook(book.id);
+
+      if (reloadAppData) {
+        await reloadAppData();
+      }
+
+      navigate("/explorar-libros");
+    } catch (err) {
+      console.error(err);
+      alert("No se pudo eliminar el libro.");
+    }
   }
 
   if (loading) return <p>Cargando libro...</p>;
@@ -329,7 +375,7 @@ useEffect(() => {
               {esFavorito ? "★ Quitar favorito" : "☆ Agregar a favoritos"}
             </button>
 
-            {!isEditing ? (
+            {esDuenoDelLibro && !isEditing ? (
               <button
                 className="secondaryButton"
                 onClick={() => {
@@ -339,7 +385,7 @@ useEffect(() => {
               >
                 Editar libro
               </button>
-            ) : (
+            ) : esDuenoDelLibro && isEditing (
               <>
                 <button className="primaryButton" onClick={handleSaveBook}>
                   Guardar cambios
@@ -349,6 +395,15 @@ useEffect(() => {
                   Cancelar
                 </button>
               </>
+            )}
+
+            {esDuenoDelLibro && (
+              <button
+                className="dangerActionButton"
+                onClick={handleDeleteBook}
+              >
+                Eliminar libro
+              </button>
             )}
           </div>
         </div>
