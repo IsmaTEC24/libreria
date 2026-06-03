@@ -31,12 +31,14 @@ export default function FormLibroPage() {
   const [pdfFile, setPdfFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
   const [loading, setLoading] = useState(modoEdicion);
+  const [existingBook, setExistingBook] = useState(null);
 
   useEffect(() => {
     async function loadBook() {
       if (!modoEdicion) return;
       try {
         const data = await getBookById(libroId);
+        setExistingBook(data);
         setFormData({
           title: data.title || "",
           author: data.author || "",
@@ -192,12 +194,27 @@ export default function FormLibroPage() {
           </div>
 
           <div className="formGroup">
-            <label>Portada (PNG/JPG)</label>
+            <label>
+              Portada (PNG/JPG)
+              {modoEdicion && existingBook?.coverBlobName && (
+                <span style={{ color: "var(--success)", marginLeft: 8, fontSize: "0.9rem" }}>✓ Ya existe</span>
+              )}
+            </label>
             <input
               type="file"
               accept="image/png,image/jpeg"
               onChange={handleCoverChange}
             />
+            {modoEdicion && existingBook?.coverBlobName && !coverFile && (
+              <small style={{ marginTop: 4, display: "block", color: "var(--text-soft)" }}>
+                Portada actual guardada. Sube una nueva para reemplazarla.
+              </small>
+            )}
+            {coverFile && (
+              <small style={{ marginTop: 4, display: "block", color: "var(--success)" }}>
+                Nueva portada: {coverFile.name}
+              </small>
+            )}
             {coverPreview && (
               <img
                 src={coverPreview}
@@ -208,16 +225,26 @@ export default function FormLibroPage() {
           </div>
 
           <div className="formGroup">
-            <label>Archivo PDF {!modoEdicion && <span style={{ color: "red" }}>*</span>}</label>
+            <label>
+              Archivo PDF {!modoEdicion && <span style={{ color: "red" }}>*</span>}
+              {modoEdicion && existingBook?.pdfBlobName && (
+                <span style={{ color: "var(--success)", marginLeft: 8, fontSize: "0.9rem" }}>✓ Ya existe</span>
+              )}
+            </label>
             <input
               type="file"
               accept="application/pdf"
               onChange={handlePdfChange}
               required={!modoEdicion}
             />
+            {modoEdicion && existingBook?.pdfBlobName && !pdfFile && (
+              <small style={{ marginTop: 4, display: "block", color: "var(--text-soft)" }}>
+                PDF actual guardado. Sube uno nuevo para reemplazarlo.
+              </small>
+            )}
             {pdfFile && (
-              <small style={{ marginTop: 4, display: "block" }}>
-                {pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)
+              <small style={{ marginTop: 4, display: "block", color: "var(--success)" }}>
+                Nuevo PDF: {pdfFile.name} ({(pdfFile.size / 1024 / 1024).toFixed(2)} MB)
               </small>
             )}
           </div>
