@@ -14,7 +14,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## Estado Actual del Proyecto (2026-05-26)
+## Estado Actual del Proyecto (2026-06-03)
 
 ### Completado
 
@@ -29,6 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - [x] APIM configurado con los 14 endpoints de MS-2 usando `set-backend-service`
 - [x] GitHub Actions CI/CD para MS-2 (`deploy-ms2.yml`) — se dispara en push a `microservicios/ms2-nodejs/**`
 - [x] Compound unique indexes en `ReadingProgress` y `Favorite` (previene duplicados)
+- [x] Código limpio: eliminado código muerto (authService, peticiones_Azure), refactorizado booksService
 
 ### Pendiente
 
@@ -123,8 +124,8 @@ Two providers wrap the app (`src/main.jsx`):
 
 ### Service Layer
 
-- `src/services/booksService.js` — all API calls for books, categories, reading-progress, favorites, users. Single `apiRequest()` helper prepends `VITE_API_BASE_URL` and attaches the subscription key.
-- `src/services/usersService.js` — duplicate CRUD for users (used by `authContext.jsx`).
+- `src/services/booksService.js` — API calls for books, categories, reading-progress, favorites, users. Single `apiRequest()` helper prepends `VITE_API_BASE_URL` and attaches the subscription key.
+- `src/services/usersService.js` — CRUD for users (used by `authContext.jsx`). Only user service in the app.
 - `src/firebase.js` — initializes Firebase app and exports `auth`.
 
 ### Routing (`src/App.jsx`)
@@ -267,7 +268,7 @@ Will handle real-time notifications via Azure Service Bus + WebSocket.
 
 ### Notification flow
 
-Trigger event (e.g. book added) → MS-1 or MS-2 publishes to Azure Service Bus → MS-3:
+Trigger event (e.g. book added) → MS-2 publishes to Azure Service Bus → MS-3:
 1. Reads message from queue
 2. Persists notification to DB
 3. Emits real-time event via WebSocket to frontend
