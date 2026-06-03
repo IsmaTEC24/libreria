@@ -7,4 +7,5 @@ public interface CategoryRepositoryPort {
     List<Category> findAll();
     long count();
     void saveAll(List<Category> categories);
+    Category save(Category category);
 }
