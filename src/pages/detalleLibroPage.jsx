@@ -354,7 +354,12 @@ useEffect(() => {
 
                 <div className="metaItem">
                   <strong>Subido por</strong>
-                  <span>{uploadedByName}</span>
+                  <button
+                    className="metaItemLink"
+                    onClick={() => navigate("/perfil-usuario", { state: { usuarioId: bookOwnerId } })}
+                  >
+                    {uploadedByName}
+                  </button>
                 </div>
               </div>
             </>
