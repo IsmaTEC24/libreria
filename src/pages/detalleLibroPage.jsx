@@ -363,47 +363,49 @@ useEffect(() => {
               Volver
             </button>
 
-            <button
-              className="primaryButton"
-              onClick={() =>
-                navigate("/lectura", { state: { libroId: book.id } })
-              }
-            >
-              Seguir leyendo
-            </button>
-
-            <button className="secondaryButton" onClick={toggleFavorito}>
-              {esFavorito ? "★ Quitar favorito" : "☆ Agregar a favoritos"}
-            </button>
-
-            {esDuenoDelLibro && !isEditing ? (
-              <button
-                className="secondaryButton"
-                onClick={() => {
-                  setIsEditing(true);
-                  setSaveMessage("");
-                }}
-              >
-                Editar libro
-              </button>
-            ) : esDuenoDelLibro && isEditing ? (
+            {esDuenoDelLibro ? (
               <>
-                <button className="primaryButton" onClick={handleSaveBook}>
-                  Guardar cambios
+                <button
+                  className="primaryButton"
+                  onClick={() =>
+                    navigate("/lectura", { state: { libroId: book.id } })
+                  }
+                >
+                  Seguir leyendo
                 </button>
 
-                <button className="secondaryButton" onClick={handleCancelEdit}>
-                  Cancelar
+                {!isEditing ? (
+                  <button
+                    className="secondaryButton"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setSaveMessage("");
+                    }}
+                  >
+                    Editar libro
+                  </button>
+                ) : (
+                  <>
+                    <button className="primaryButton" onClick={handleSaveBook}>
+                      Guardar cambios
+                    </button>
+
+                    <button className="secondaryButton" onClick={handleCancelEdit}>
+                      Cancelar
+                    </button>
+                  </>
+                )}
+
+                <button
+                  className="dangerActionButton"
+                  onClick={handleDeleteBook}
+                >
+                  Eliminar libro
                 </button>
               </>
-            ) : null}
-
-            {esDuenoDelLibro && (
-              <button
-                className="dangerActionButton"
-                onClick={handleDeleteBook}
-              >
-                Eliminar libro
+            ) : (
+              <button className="secondaryButton" onClick={toggleFavorito}>
+                {esFavorito ? "★ Quitar de biblioteca" : "☆ Agregar a mi biblioteca"}
               </button>
             )}
           </div>
