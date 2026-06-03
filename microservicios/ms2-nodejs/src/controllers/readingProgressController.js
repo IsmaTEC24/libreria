@@ -2,7 +2,9 @@ const ReadingProgress = require("../models/ReadingProgress");
 
 async function getAll(req, res) {
   try {
-    const progress = await ReadingProgress.find();
+    const { userId } = req.query;
+    if (!userId) return res.json([]);
+    const progress = await ReadingProgress.find({ userId });
     res.json(progress);
   } catch (error) {
     res.status(500).json({ message: error.message });
