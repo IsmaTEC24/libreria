@@ -5,4 +5,5 @@ import java.util.List;
 
 public interface CategoryUseCase {
     List<Category> getAllCategories();
+    Category createCategory(Category category);
 }
