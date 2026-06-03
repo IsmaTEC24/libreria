@@ -66,62 +66,140 @@ export function deleteUser(id) {
 }
 
 /* CATEGORIES */
-export function getCategories() {
-  return apiRequest("/categories", {
-    method: "GET",
-    headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-    },
-  });
+/* CATEGORIES - TEMPORAL */
+export async function getCategories() {
+  return [
+    { id: 1, name: "General" },
+    { id: 2, name: "Matemática" },
+    { id: 3, name: "Programación" },
+    { id: 4, name: "Administración" },
+    { id: 5, name: "Inglés" },
+  ];
 }
 
 /* BOOKS */
 export function getBooks() {
   return apiRequest("/books", {
     method: "GET",
-    headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-    },
   });
 }
 
-export function getBookById(id) {
-  return apiRequest(`/books/${id}`, {
+// Temporal: mientras no tengamos conectado GET /books/{id} en Azure Functions,
+// buscamos el libro dentro de la lista general.
+export async function getBookById(id) {
+  const books = await getBooks();
+  const book = books.find((item) => String(item.id) === String(id));
+
+  if (!book) {
+    throw new Error("Libro no encontrado.");
+  }
+
+  return {
+    ...book,
+    currentStatus: book.currentStatus || book.current_status || "activo",
+    isPublic: book.isPublic ?? book.is_public ?? true,
+    userId: book.userId || book.user_id || null,
+    coverUrl: book.coverUrl || null,
+  };
+}
+
+export function getBookFileUrl(id) {
+  return apiRequest(`/books/${id}/file-url`, {
     method: "GET",
-    headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-    },
   });
 }
 
-export function createBook(formData) {
-  return fetch(`${API_BASE_URL}/books`, {
+export async function openBookPdf(id) {
+  const data = await getBookFileUrl(id);
+
+  if (!data?.fileUrl) {
+    throw new Error("No se pudo obtener la URL del PDF.");
+  }
+
+  window.open(data.fileUrl, "_blank");
+  return data;
+}
+
+export function generateUploadUrl(file) {
+  if (!file) {
+    throw new Error("Debe seleccionar un archivo.");
+  }
+
+  return apiRequest("/generate-upload-url", {
     method: "POST",
-    headers: { "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY },
-    body: formData,
-  }).then((r) => {
-    if (!r.ok) throw new Error(`Error HTTP: ${r.status}`);
-    return r.json();
+    body: JSON.stringify({
+      fileName: file.name,
+      contentType: file.type,
+    }),
   });
 }
 
-export function updateBook(id, formData) {
-  return fetch(`${API_BASE_URL}/books/${id}`, {
+export async function uploadFileToBlob(file) {
+  const uploadData = await generateUploadUrl(file);
+
+  const uploadResponse = await fetch(uploadData.uploadUrl, {
     method: "PUT",
-    headers: { "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY },
-    body: formData,
-  }).then((r) => {
-    if (!r.ok) throw new Error(`Error HTTP: ${r.status}`);
-    return r.json();
+    headers: {
+      "x-ms-blob-type": "BlockBlob",
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new Error(`Error subiendo archivo a Blob: ${uploadResponse.status}`);
+  }
+
+  return uploadData.blobName;
+}
+
+export function createBook(book) {
+  return apiRequest("/books", {
+    method: "POST",
+    body: JSON.stringify(book),
+  });
+}
+
+export async function createBookWithPdf(bookData, pdfFile, coverFile = null) {
+  if (!pdfFile) {
+    throw new Error("Debe seleccionar un PDF.");
+  }
+
+  const pdfBlobName = await uploadFileToBlob(pdfFile);
+
+  let coverBlobName = null;
+
+  if (coverFile) {
+    coverBlobName = await uploadFileToBlob(coverFile);
+  }
+
+  const newBook = {
+    userId: bookData.userId,
+    title: bookData.title,
+    author: bookData.author,
+    description: bookData.description,
+    category: bookData.category,
+    language: bookData.language || "es",
+    currentStatus: bookData.currentStatus || "activo",
+    isPublic: bookData.isPublic ?? true,
+    pdf_blob_name: pdfBlobName,
+    cover_blob_name: coverBlobName,
+  };
+
+  return createBook(newBook);
+}
+
+// Pendiente: todavía no conectamos PUT /books/{id} en Azure Functions.
+export function updateBook(id, book) {
+  return apiRequest(`/books/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(book),
   });
 }
 
 export function deleteBook(id) {
   return apiRequest(`/books/${id}`, {
     method: "DELETE",
-    headers: {
-      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-    },
   });
 }
 
