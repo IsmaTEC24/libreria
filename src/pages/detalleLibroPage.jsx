@@ -14,7 +14,7 @@ export default function DetalleLibroPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { books, users = [], loading, error, reloadAppData, favorites } = useAppData();
+  const { books, users = [], loading, error, reloadAppData, favorites, readingProgress } = useAppData();
 
   const libroId = location.state?.libroId;
 
@@ -32,6 +32,13 @@ const book = useMemo(() => {
   }, [favorites, book, currentUser]);
 
   const esFavorito = Boolean(favoritoActual);
+
+  const tieneProgreso = useMemo(() => {
+    if (!currentUser || !book) return false;
+    return readingProgress?.some(
+      (p) => String(p.userId) === String(currentUser.id) && String(p.bookId) === String(book.id)
+    ) || false;
+  }, [readingProgress, currentUser, book]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -404,9 +411,17 @@ useEffect(() => {
                 </button>
               </>
             ) : (
-              <button className="secondaryButton" onClick={toggleFavorito}>
-                {esFavorito ? "★ Quitar de biblioteca" : "☆ Agregar a mi biblioteca"}
-              </button>
+              <>
+                <button
+                  className="primaryButton"
+                  onClick={() => navigate("/lectura", { state: { libroId: book.id } })}
+                >
+                  {tieneProgreso ? "Seguir lectura" : "Empezar lectura"}
+                </button>
+                <button className="secondaryButton" onClick={toggleFavorito}>
+                  {esFavorito ? "★ Quitar de biblioteca" : "☆ Agregar a mi biblioteca"}
+                </button>
+              </>
             )}
           </div>
         </div>
