@@ -35,11 +35,13 @@ export function AppDataProvider({ children }) {
 
       const val = (r) => (r.status === "fulfilled" && Array.isArray(r.value) ? r.value : []);
 
-      // Normalizar campos: asegurar consistencia en IDs
+      // Normalizar campos: asegurar consistencia en IDs y nombres de blob
       const normalizeBooks = (booksArray) => {
         return booksArray.map((book) => ({
           ...book,
           userId: book.userId || book.user_id,
+          coverBlobName: book.coverBlobName || book.cover_blob_name,
+          pdfBlobName: book.pdfBlobName || book.pdf_blob_name,
         }));
       };
 
