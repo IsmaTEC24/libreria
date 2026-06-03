@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppData } from "../context/appDataContext.jsx";
+import { getBookCoverUrl } from "../services/booksService.js";
 import EmptyState from "../components/EmptyState.jsx";
 
 export default function PerfilUsuarioPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { books, users, readingProgress, loading, error } = useAppData();
+  const [coverUrls, setCoverUrls] = useState({});
 
   const usuarioId = location.state?.usuarioId;
 
@@ -28,6 +30,34 @@ export default function PerfilUsuarioPage() {
     if (!usuario) return [];
     return readingProgress.filter((p) => String(p.userId) === String(usuario.id) && p.percentage === 100);
   }, [readingProgress, usuario]);
+
+  async function loadCoverUrls() {
+    const allBooks = [...librosSubidos, ...librosEnProces.map((p) => books.find((b) => String(b.id) === String(p.bookId))).filter(Boolean), ...librosDeterminados.map((p) => books.find((b) => String(b.id) === String(p.bookId))).filter(Boolean)];
+    const covers = {};
+    await Promise.all(
+      allBooks.map(async (book) => {
+        if (!book) return;
+        try {
+          if (!book.cover_blob_name && !book.coverBlobName) return;
+          const response = await getBookCoverUrl(book.id);
+          if (response?.coverUrl) covers[book.id] = response.coverUrl;
+        } catch (err) {
+          console.warn(`No se pudo cargar la portada del libro ${book.id}`, err);
+        }
+      })
+    );
+    setCoverUrls(covers);
+  }
+
+  useMemo(() => {
+    if (librosSubidos.length > 0 || librosEnProces.length > 0 || librosDeterminados.length > 0) {
+      loadCoverUrls();
+    }
+  }, [librosSubidos, librosEnProces, librosDeterminados]);
+
+  function getCoverImage(book) {
+    return coverUrls[book.id] || book.coverUrl || "/assets/defaultBook.png";
+  }
 
   if (loading) return <p style={{ color: "var(--muted)" }}>Cargando perfil...</p>;
   if (error) return <p className="unsavedWarning">{error}</p>;
@@ -88,7 +118,7 @@ export default function PerfilUsuarioPage() {
                     style={{ cursor: "pointer" }}
                   >
                     <img
-                      src={book.coverUrl || "/assets/defaultBook.png"}
+                      src={getCoverImage(book)}
                       alt={book.title}
                       className="bookCardImage"
                     />
@@ -121,7 +151,7 @@ export default function PerfilUsuarioPage() {
                         style={{ cursor: "pointer" }}
                       >
                         <img
-                          src={book.coverUrl || "/assets/defaultBook.png"}
+                          src={getCoverImage(book)}
                           alt={book.title}
                           className="bookCardImage"
                         />
@@ -159,7 +189,7 @@ export default function PerfilUsuarioPage() {
                         style={{ cursor: "pointer" }}
                       >
                         <img
-                          src={book.coverUrl || "/assets/defaultBook.png"}
+                          src={getCoverImage(book)}
                           alt={book.title}
                           className="bookCardImage"
                         />
