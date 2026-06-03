@@ -199,19 +199,32 @@ export default function HomePage() {
           />
         ) : (
           <div className="booksGrid">
-            {misBibliotecaLibros.slice(0, 6).map((book) => (
-              <div
-                key={book.id}
-                onClick={() => navigate("/detalle-libro", { state: { libroId: book.id } })}
-                style={{ cursor: "pointer" }}
-              >
-                <BookCard
-                  titulo={book.title}
-                  autor={book.author}
-                  portada={getCoverImage(book)}
-                />
-              </div>
-            ))}
+            {misBibliotecaLibros.slice(0, 6).map((book) => {
+              const tieneProgreso = readingProgress?.some(
+                (p) => String(p.userId) === String(currentUser?.id) && String(p.bookId) === String(book.id)
+              );
+              return (
+                <div key={book.id} className="miBibliotecaCardWrapper">
+                  <div
+                    onClick={() => navigate("/detalle-libro", { state: { libroId: book.id } })}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <BookCard
+                      titulo={book.title}
+                      autor={book.author}
+                      portada={getCoverImage(book)}
+                    />
+                  </div>
+                  <button
+                    className="primaryButton"
+                    onClick={() => navigate("/lectura", { state: { libroId: book.id } })}
+                    style={{ fontSize: "0.88rem", padding: "8px 12px" }}
+                  >
+                    {tieneProgreso ? "Seguir lectura" : "Empezar lectura"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>
