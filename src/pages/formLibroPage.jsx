@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  createBook,
+  createBookWithPdf,
   getBookById,
   updateBook,
 } from "../services/booksService.js";
@@ -43,8 +43,8 @@ export default function FormLibroPage() {
           category: data.category || "",
           description: data.description || "",
           language: data.language || "es",
-          currentStatus: data.currentStatus || "activo",
-          isPublic: data.isPublic ?? true,
+          currentStatus: data.currentStatus || data.current_status || "activo",
+          isPublic: data.isPublic ?? data.is_public ?? true,
         });
         if (data.coverUrl) setCoverPreview(data.coverUrl);
       } catch (err) {
@@ -86,23 +86,35 @@ export default function FormLibroPage() {
     }
 
     try {
-      const data = new FormData();
-      data.append("userId", currentUser.id);
-      data.append("title", formData.title);
-      data.append("author", formData.author);
-      data.append("category", formData.category);
-      data.append("description", formData.description || "");
-      data.append("language", formData.language);
-      data.append("currentStatus", formData.currentStatus);
-      data.append("isPublic", formData.isPublic);
-      if (coverFile) data.append("coverFile", coverFile);
-      if (pdfFile) data.append("pdfFile", pdfFile);
+      const userId =
+        currentUser?.id ||
+        currentUser?.userId ||
+        currentUser?.user_id ||
+        currentUser?.uid ||
+        null;
+
+      if (!userId) {
+        alert("No se pudo identificar el usuario actual.");
+        return;
+      }
+
+      const bookData = {
+        userId,
+        title: formData.title,
+        author: formData.author,
+        category: formData.category,
+        description: formData.description || "",
+        language: formData.language || "es",
+        currentStatus: formData.currentStatus || "activo",
+        isPublic: formData.isPublic ?? true,
+      };
 
       if (modoEdicion) {
-        await updateBook(libroId, data);
-      } else {
-        await createBook(data);
+        alert("La edición de libros todavía no está conectada al backend nuevo.");
+        return;
       }
+
+      await createBookWithPdf(bookData, pdfFile, coverFile);
 
       await reloadAppData();
       navigate("/admin-libros");
@@ -154,7 +166,7 @@ export default function FormLibroPage() {
               <option value="">Seleccione una categoría</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.name}>
-                  {category.label}
+                  {category.label || category.name}
                 </option>
               ))}
             </select>
