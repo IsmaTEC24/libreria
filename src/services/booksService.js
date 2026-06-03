@@ -203,6 +203,29 @@ export function updateBook(id, book) {
   });
 }
 
+export async function updateBookWithFiles(id, bookData, pdfFile = null, coverFile = null) {
+  const updatedBook = {
+    userId: bookData.userId,
+    title: bookData.title,
+    author: bookData.author,
+    description: bookData.description,
+    category: bookData.category,
+    language: bookData.language || "es",
+    currentStatus: bookData.currentStatus || "activo",
+    isPublic: bookData.isPublic ?? true,
+  };
+
+  if (pdfFile) {
+    updatedBook.pdf_blob_name = await uploadFileToBlob(pdfFile);
+  }
+
+  if (coverFile) {
+    updatedBook.cover_blob_name = await uploadFileToBlob(coverFile);
+  }
+
+  return updateBook(id, updatedBook);
+}
+
 export function deleteBook(id) {
   return apiRequest(`/books/${id}`, {
     method: "DELETE",
