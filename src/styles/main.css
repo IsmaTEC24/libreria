@@ -1695,6 +1695,7 @@ body.darkMode .sidebarLogout:hover {
   color: var(--muted);
   margin: 6px 0 0;
   line-height: 1.4;
+  line-clamp: 2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

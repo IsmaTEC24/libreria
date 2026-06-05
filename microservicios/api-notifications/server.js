@@ -396,11 +396,14 @@ app.post("/books/:id/like", async (req, res) => {
       likesCount: countResult.recordset[0].likesCount,
       notification,
     });
-  } catch {
-    return res.status(500).json({
-      message: "Error registrando like.",
-    });
-  }
+    } catch (error) {
+      console.error("Error registrando like:", error.message);
+
+      return res.status(500).json({
+        message: "Error registrando like.",
+        detail: error.message,
+      });
+    }
 });
 
 app.get("/books/:id/like-status", async (req, res) => {
@@ -448,11 +451,14 @@ app.get("/books/:id/like-status", async (req, res) => {
       liked: Boolean(result.recordset[0].liked),
       likesCount: result.recordset[0].likesCount,
     });
-  } catch {
-    return res.status(500).json({
-      message: "Error obteniendo estado del like.",
-    });
-  }
+    } catch (error) {
+      console.error("Error en like-status:", error.message);
+
+      return res.status(500).json({
+        message: "Error obteniendo estado del like.",
+        detail: error.message,
+      });
+    }
 });
 
 app.listen(PORT, () => {
