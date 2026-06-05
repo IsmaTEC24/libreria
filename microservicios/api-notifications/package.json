@@ -1,7 +1,7 @@
 {
   "name": "api-notifications",
   "version": "1.0.0",
-  "description": "",
+  "description": "API de notificaciones ReadFlow",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
