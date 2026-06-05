@@ -1,0 +1,32 @@
+name: Deploy MS3 to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'microservicios/api-notifications/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install production dependencies
+        run: npm ci --omit=dev
+        working-directory: microservicios/api-notifications
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'app-milibreria-notifications'
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_MS3 }}
+          package: './microservicios/api-notifications'
