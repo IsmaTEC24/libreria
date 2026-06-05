@@ -5,6 +5,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const sql = require("mssql");
+const certAuth = require("./certAuth");
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(certAuth);
 
 function parseSignalRConnectionString() {
   if (!SIGNALR_CONNECTION_STRING) {
