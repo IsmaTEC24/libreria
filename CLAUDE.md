@@ -9,36 +9,34 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Component | Path | Tech | Estado |
 |---|---|---|---|
 | Frontend | `src/` | React 19, Vite, React Router v7 | Completo |
-| MS-1 Backend | `api-functions/` | Azure Functions + Node.js + SQL Server | Completo |
+| MS-1 Backend | `api-functions/` | Azure Functions + Node.js + SQL Server | Completo y desplegado |
 | MS-2 Backend | `microservicios/ms2-nodejs/` | Node.js, Express, Mongoose | Completo y desplegado |
 | MS-3 Backend | `microservicios/ms3-python/` *(pendiente)* | Python + FastAPI (Notifications) | Pendiente |
 
 ---
 
-## Estado Actual del Proyecto (2026-06-03)
+## Estado Actual del Proyecto (2026-06-04)
 
 ### Completado
 
 - [x] Frontend React completo con todas las páginas y rutas
 - [x] Rediseño estético: paleta pastel lavender/rosa/menta, DM Sans + DM Serif Display, glassmorphism, dark mode
+- [x] Dark mode sidebar mejorado, filtros de categoría como dropdown, spinners inline por sección, componente CoverImage
 - [x] Firebase Auth integrado (login, registro, perfil)
 - [x] MS-2 Node.js + Express desplegado en Azure App Service (`readflow-ms2`)
 - [x] Cosmos DB for MongoDB — colecciones: `users`, `readingprogresses`, `favorites`
-- [x] 4 usuarios sembrados en Cosmos DB (Victor, Ian, Ismael, Mariano)
-- [x] Reading Progress migrado de localStorage → MS-2 API
-- [x] Favorites migrado de localStorage → MS-2 API
-- [x] APIM configurado con los 14 endpoints de MS-2 usando `set-backend-service`
-- [x] GitHub Actions CI/CD para MS-2 (`deploy-ms2.yml`) — se dispara en push a `microservicios/ms2-nodejs/**`
-- [x] Compound unique indexes en `ReadingProgress` y `Favorite` (previene duplicados)
-- [x] Código limpio: eliminado código muerto (authService, peticiones_Azure), refactorizado booksService
+- [x] Reading Progress y Favorites migrados de localStorage → MS-2 API
+- [x] APIM configurado con todos los endpoints de MS-1 y MS-2 usando `set-backend-service`
+- [x] GitHub Actions CI/CD para MS-2 (`deploy-ms2.yml`)
+- [x] Compound unique indexes en `ReadingProgress` y `Favorite`
 - [x] MS-1 Azure Functions — Books CRUD + file/cover URLs + file upload (Azure Storage Blob)
+- [x] **Certificados mTLS implementados y funcionando** — APIM presenta `apim-client-cert` a MS-1 y MS-2; backends validan thumbprint
 
 ### Pendiente
 
 - [ ] **MS-3 Python FastAPI** — Notificaciones con Azure Service Bus + WebSocket
 - [ ] Colección Postman — 19 endpoints, mínimo 1 test por endpoint (entregable)
 - [ ] GitHub Actions para MS-3
-- [ ] Conectar MS-1 endpoints a APIM (cambiar mock → `set-backend-service`)
 - [ ] Documentación Swagger / OpenAPI
 - [ ] Video demostrativo — máx 5 min, arquitectura + flujos de negocio
 
@@ -46,27 +44,139 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Próximos Pasos (orden recomendado)
 
-### 1. MS-1 — Integración con APIM
-- Configurar endpoints `/books`, `/books/{id}` en APIM para apuntar a Azure Functions
-- Cambiar policies de mock → `set-backend-service` a `func-milibreria-api`
-- Validar que GET/POST books funciona desde frontend
-
-### 2. MS-3 — Python FastAPI (Notifications)
+### 1. MS-3 — Python FastAPI (Notifications)
 - Crear proyecto FastAPI en `microservicios/ms3-python/`
 - Conectar a Azure Service Bus (receptor de mensajes)
 - WebSocket para notificaciones en tiempo real al frontend
-- MS-1 o MS-2 deben publicar eventos al Service Bus (ej. libro agregado)
+- MS-1 o MS-2 publican eventos al Service Bus (ej. libro agregado)
 - Crear Azure App Service para MS-3
+- Configurar certificados mTLS para MS-3 (ver sección Certificados más abajo)
 - Configurar GitHub Actions `deploy-ms3.yml`
 
-### 3. Postman Collection
+### 2. Postman Collection
 - Crear colección con los 19 endpoints (5 MS-1 + 14 MS-2)
 - Al menos 1 test automatizado por endpoint (status code, schema, etc.)
 - Exportar como JSON para entrega
+- Configurar certificado `apim-client-cert` en la colección Postman para autenticación
 
-### 4. Documentación Final
+### 3. Documentación Final
 - Swagger/OpenAPI para MS-1 y MS-2
 - Video máx 5 min: mostrar arquitectura APIM → microservicios, flujos de login, favoritos, lectura, notificaciones
+
+---
+
+## Seguridad — Certificados mTLS (APIM → Backends)
+
+Esta sección documenta la implementación completa de certificados. **Repetir estos pasos al crear MS-3.**
+
+### Arquitectura
+
+```
+Cliente (Frontend/Postman)
+        ↓  Ocp-Apim-Subscription-Key
+      APIM
+        ↓  presenta apim-client-cert (mTLS)
+   MS-1 / MS-2 / MS-3
+        validan thumbprint via X-ARR-ClientCert header
+```
+
+### Certificados en Azure Key Vault (`readflow-kv`)
+
+| Certificado | Uso |
+|---|---|
+| `apim-client-cert` | APIM lo presenta al llamar a cualquier backend |
+| `func-milibreria-api-server` | Cert de servidor de MS-1 |
+| `readflow-ms2-server` | Cert de servidor de MS-2 |
+
+Al crear MS-3, agregar: `readflow-ms3-server` con el mismo proceso.
+
+### APIM — Policy Global (All Operations)
+
+```xml
+<policies>
+    <inbound>
+        <choose>
+            <when condition="@(context.Request.Url.Path.Contains("/books") || context.Request.Url.Path.Contains("/categories"))">
+                <set-backend-service backend-id="ms1-functions" />
+            </when>
+            <otherwise>
+                <set-backend-service backend-id="ms2-nodejs" />
+            </otherwise>
+        </choose>
+        <cors allow-credentials="false">
+            <allowed-origins>
+                <origin>https://brave-sea-03b672010.2.azurestaticapps.net</origin>
+                <origin>http://localhost:5173</origin>
+                <origin>http://localhost:3000</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+                <method>PUT</method>
+                <method>DELETE</method>
+                <method>OPTIONS</method>
+                <method>PATCH</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+            <expose-headers>
+                <header>*</header>
+            </expose-headers>
+        </cors>
+        <authentication-certificate certificate-id="apim-client-cert" />
+    </inbound>
+    <backend>
+        <forward-request />
+    </backend>
+    <outbound />
+    <on-error />
+</policies>
+```
+
+Al agregar MS-3 al `<choose>`, añadir una nueva `<when>` con el path de notificaciones y el backend-id de MS-3.
+
+### Configuración Azure Portal por backend
+
+Para cada App Service / Function App:
+1. **Configuration → General settings → Client certificate mode → Allow**
+   - `readflow-ms2` ✅ hecho
+   - `func-milibreria-api` ✅ hecho
+   - MS-3 App Service → pendiente al crearlo
+
+2. **Configuration → Application settings → `APIM_CERT_THUMBPRINT`**
+   - Valor: thumbprint del certificado `apim-client-cert` (se obtiene en Key Vault → Certificates → apim-client-cert → versión actual)
+   - `readflow-ms2` ✅ hecho
+   - `func-milibreria-api` ✅ hecho
+   - MS-3 App Service → pendiente al crearlo
+
+### Implementación en código
+
+**Cómo funciona:** Azure App Service pasa el certificado cliente al app via el header `X-ARR-ClientCert` (base64 DER). El código calcula el SHA-1 del DER y lo compara contra `APIM_CERT_THUMBPRINT`.
+
+Si `APIM_CERT_THUMBPRINT` no está configurado (desarrollo local), la validación se omite automáticamente.
+
+**MS-2 (Express)** — middleware en `src/middleware/certAuth.js`, registrado en `app.js` antes de las rutas. El endpoint `/health` está excluido.
+
+**MS-1 (Azure Functions)** — utilidad en `src/functions/certAuth.js`, llamada al inicio de cada handler con `const certError = checkApimCert(request); if (certError) return certError;`. El health check no tiene validación.
+
+**MS-3 (Python FastAPI)** — al implementar, crear middleware equivalente:
+```python
+import hashlib, base64, os
+from fastapi import Request, HTTPException
+
+async def verify_apim_cert(request: Request):
+    expected = os.getenv("APIM_CERT_THUMBPRINT", "").upper().replace(":", "").replace(" ", "")
+    if not expected:
+        return
+    cert_header = request.headers.get("x-arr-clientcert")
+    if not cert_header:
+        raise HTTPException(status_code=401, detail="Client certificate required")
+    cert_der = base64.b64decode(cert_header)
+    thumbprint = hashlib.sha1(cert_der).hexdigest().upper()
+    if thumbprint != expected:
+        raise HTTPException(status_code=403, detail="Invalid client certificate")
+```
 
 ---
 
@@ -199,15 +309,15 @@ Azure Functions (Node.js) for Books CRUD, file/cover URLs, and file uploads. Use
 ```bash
 cd api-functions
 npm start          # local development server
-npm run test       # run tests (no tests yet)
 ```
 
-### Environment Variables (local.settings.json)
+### Environment Variables (`local.settings.json`)
 
 ```json
 {
   "SQL_CONNECTION_STRING": "Server=...",
-  "AZURE_STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;..."
+  "AZURE_STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=https;...",
+  "APIM_CERT_THUMBPRINT": ""
 }
 ```
 
@@ -215,25 +325,29 @@ npm run test       # run tests (no tests yet)
 
 ```
 api-functions/
-├── host.json                     # Azure Functions runtime config
+├── host.json
 ├── package.json
 └── src/functions/
-    ├── books.js                  # GET/POST /api/books (Books CRUD)
-    ├── bookFileUrl.js            # GET /api/books/{id}/file-url (PDF SAS)
-    ├── bookCoverUrl.js           # GET /api/books/{id}/cover-url (Cover SAS)
-    ├── generateUploadUrl.js       # POST /api/generate-upload-url (Blob SAS)
-    └── health.js                 # GET /api/health (Health check)
+    ├── certAuth.js           # Utilidad de validación de certificado (checkApimCert)
+    ├── books.js              # GET/POST /api/books + GET/PUT/DELETE /api/books/{id}
+    ├── bookFileUrl.js        # GET /api/books/{id}/file-url (PDF SAS)
+    ├── bookCoverUrl.js       # GET /api/books/{id}/cover-url (Cover SAS)
+    ├── generateUploadUrl.js  # POST /api/generate-upload-url (Blob SAS)
+    └── health.js             # GET /api/health (sin validación de cert)
 ```
 
-### Endpoints — 5 operations
+### Endpoints
 
 | Method | Endpoint | Notes |
 |---|---|---|
 | GET | `/api/books` | Returns all books |
 | POST | `/api/books` | Create book (requires `pdf_blob_name`) |
-| GET | `/api/books/{id}/file-url` | SAS URL for PDF (expires in 1 hour) |
-| GET | `/api/books/{id}/cover-url` | SAS URL for cover image |
-| POST | `/api/generate-upload-url` | Get SAS URL to upload file to Blob Storage |
+| GET | `/api/books/{id}` | Get book by id |
+| PUT | `/api/books/{id}` | Update book |
+| DELETE | `/api/books/{id}` | Delete book + blobs |
+| GET | `/api/books/{id}/file-url` | SAS URL for PDF (30 min) |
+| GET | `/api/books/{id}/cover-url` | SAS URL for cover image (30 min) |
+| POST | `/api/generate-upload-url` | SAS URL to upload file to Blob Storage |
 | GET | `/api/health` | Health check |
 
 ### Database — Azure SQL Server
@@ -259,7 +373,7 @@ CREATE TABLE dbo.Books (
 
 ### CI/CD
 
-**Status:** Not yet configured. Manual deployment via VS Code Azure Extensions or `func azure functionapp publish`.
+Manual deployment via VS Code Azure Extensions or `func azure functionapp publish`.
 
 ---
 
@@ -287,20 +401,23 @@ npm start      # node server.js (production)
 ```
 PORT=3000
 COSMOS_CONNECTION_STRING=mongodb://...
+APIM_CERT_THUMBPRINT=<thumbprint de apim-client-cert>
 ```
 
 ### Structure
 
 ```
 ms2-nodejs/
-├── app.js                        # Express + route registration
+├── app.js                        # Express + certAuth middleware + route registration
 ├── server.js                     # entry point, connects DB then starts server
 └── src/
-    ├── config/db.js              # Mongoose connection to Cosmos DB
+    ├── config/db.js
+    ├── middleware/
+    │   └── certAuth.js           # Valida X-ARR-ClientCert header, omite /health
     ├── models/
-    │   ├── User.js               # username, name, email, password, initials, firebaseUid
-    │   ├── ReadingProgress.js    # userId, bookId, currentPage, percentage, updatedAt
-    │   └── Favorite.js           # userId, bookId — unique compound index (userId+bookId)
+    │   ├── User.js
+    │   ├── ReadingProgress.js
+    │   └── Favorite.js
     ├── controllers/
     │   ├── userController.js
     │   ├── readingProgressController.js
@@ -330,7 +447,7 @@ ms2-nodejs/
 | POST | `/favorites` | |
 | DELETE | `/favorites/:id` | |
 
-### Database — Azure Cosmos DB for MongoDB (RU-based, Serverless)
+### Database — Azure Cosmos DB for MongoDB (Serverless)
 
 Database: `ms2db`. Collections: `users`, `readingprogresses`, `favorites`.
 
@@ -343,7 +460,6 @@ All models use `toJSON` transform: exposes `id` (string), removes `_id` and `__v
 
 GitHub Actions: `.github/workflows/deploy-ms2.yml`
 - Trigger: push to `main` touching `microservicios/ms2-nodejs/**`, or manual `workflow_dispatch`
-- Runs `npm ci --omit=dev` in CI, deploys folder via `azure/webapps-deploy@v2`
 - Secret required: `AZURE_WEBAPP_PUBLISH_PROFILE_MS2`
 
 ---
@@ -356,11 +472,21 @@ Will handle real-time notifications via Azure Service Bus + WebSocket.
 
 ### Notification flow
 
-Trigger event (e.g. book added) → MS-2 publishes to Azure Service Bus → MS-3:
+Trigger event (e.g. book added) → MS-1 or MS-2 publishes to Azure Service Bus → MS-3:
 1. Reads message from queue
 2. Persists notification to DB
 3. Emits real-time event via WebSocket to frontend
-4. Sends push notification to mobile (optional)
+
+### Checklist de implementación (incluye certificados)
+
+1. Crear proyecto FastAPI en `microservicios/ms3-python/`
+2. Agregar middleware `verify_apim_cert` (ver sección Certificados arriba)
+3. Crear Azure App Service para MS-3
+4. En Azure Portal: **Configuration → General settings → Client certificate mode → Allow**
+5. En Azure Portal: **Configuration → Application settings → `APIM_CERT_THUMBPRINT`** (mismo valor que MS-1 y MS-2)
+6. Crear certificado `readflow-ms3-server` en Key Vault (`readflow-kv`)
+7. Actualizar APIM policy — agregar `<when>` para el path de notificaciones con el backend-id de MS-3
+8. Configurar GitHub Actions `deploy-ms3.yml`
 
 ---
 
@@ -369,7 +495,7 @@ Trigger event (e.g. book added) → MS-2 publishes to Azure Service Bus → MS-3
 ```
 Frontend (React)
       ↓
-   APIM (single gateway — Ocp-Apim-Subscription-Key)
+   APIM (Ocp-Apim-Subscription-Key + apim-client-cert → backends)
       ↓              ↓              ↓
 MS-1 Functions  MS-2 Node.js   MS-3 Python FastAPI
 Books CRUD      Users +        Notifications
@@ -380,8 +506,6 @@ File/Cover URLs ReadingProgress (Pendiente)
   (Activo)     (Activo)        (Pendiente)
 ```
 
-All microservices are exposed exclusively through APIM. Direct backend URLs are protected by digital certificates — only APIM can call them.
-
 ### APIM — Estado de endpoints
 
 | Endpoint | Estado | Backend |
@@ -390,3 +514,4 @@ All microservices are exposed exclusively through APIM. Direct backend URLs are 
 | `/users*` | Real — MS-2 | `readflow-ms2` |
 | `/reading-progress*` | Real — MS-2 | `readflow-ms2` |
 | `/favorites*` | Real — MS-2 | `readflow-ms2` |
+| `/notifications*` | Pendiente — MS-3 | por crear |
