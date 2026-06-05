@@ -3,7 +3,21 @@ import * as signalR from "@microsoft/signalr";
 const NOTIFICATIONS_API_URL =
   import.meta.env.VITE_NOTIFICATIONS_API_URL || "http://localhost:8080";
 
+const SUBSCRIPTION_KEY = import.meta.env.VITE_API_SUBSCRIPTION_KEY;
+
 let connection = null;
+
+function getHeaders() {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (SUBSCRIPTION_KEY) {
+    headers["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY;
+  }
+
+  return headers;
+}
 
 export function getUserId(user) {
   return (
@@ -30,12 +44,10 @@ export async function startNotificationsConnection(
   }
 
   const negotiateResponse = await fetch(
-    `${NOTIFICATIONS_API_URL}/notifications/negotiate`,
+    `${API_BASE_URL}/notifications/negotiate`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: getHeaders(),
       body: JSON.stringify({ userId }),
     }
   );
@@ -49,6 +61,8 @@ export async function startNotificationsConnection(
   connection = new signalR.HubConnectionBuilder()
     .withUrl(negotiateData.url, {
       accessTokenFactory: () => negotiateData.accessToken,
+      transport: signalR.HttpTransportType.WebSockets,
+      skipNegotiation: true,
     })
     .withAutomaticReconnect()
     .build();
@@ -84,7 +98,11 @@ export async function getBookLikeStatus(bookId, user) {
   const response = await fetch(
     `${NOTIFICATIONS_API_URL}/books/${bookId}/like-status?userId=${encodeURIComponent(
       userId
-    )}`
+    )}`,
+    {
+      method: "GET",
+      headers: getHeaders(),
+    }
   );
 
   const data = await response.json().catch(() => null);
@@ -114,9 +132,7 @@ export async function toggleBookLike(bookId, actorUser) {
 
   const response = await fetch(`${NOTIFICATIONS_API_URL}/books/${bookId}/like`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getHeaders(),
     body: JSON.stringify({
       actorUserId,
       actorName,
@@ -136,7 +152,6 @@ export async function toggleBookLike(bookId, actorUser) {
   };
 }
 
-// Compatibilidad temporal por si algún archivo viejo todavía importa esta función.
 export async function likeBookAndNotify(bookId, actorUser) {
   return toggleBookLike(bookId, actorUser);
 }
