@@ -1,6 +1,7 @@
 const { app } = require('@azure/functions');
 const sql = require('mssql');
 const { BlobServiceClient } = require('@azure/storage-blob');
+const { checkApimCert } = require('./certAuth');
 
 async function getSqlPool() {
     try {
@@ -386,6 +387,9 @@ app.http('books', {
     authLevel: 'anonymous',
     route: 'books',
     handler: async (request, context) => {
+        const certError = checkApimCert(request);
+        if (certError) return certError;
+
         try {
             if (request.method === 'GET') {
                 return await getBooks(context);
@@ -421,6 +425,9 @@ app.http('bookById', {
     authLevel: 'anonymous',
     route: 'books/{id}',
     handler: async (request, context) => {
+        const certError = checkApimCert(request);
+        if (certError) return certError;
+
         try {
             if (request.method === 'GET') {
                 return await getBookById(request, context);

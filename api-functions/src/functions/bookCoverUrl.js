@@ -5,6 +5,7 @@ const {
     generateBlobSASQueryParameters,
     BlobSASPermissions
 } = require('@azure/storage-blob');
+const { checkApimCert } = require('./certAuth');
 
 let poolPromise = null;
 
@@ -52,6 +53,9 @@ app.http('bookCoverUrl', {
     authLevel: 'anonymous',
     route: 'books/{id}/cover-url',
     handler: async (request, context) => {
+        const certError = checkApimCert(request);
+        if (certError) return certError;
+
         try {
             const id = parseInt(request.params.id, 10);
 

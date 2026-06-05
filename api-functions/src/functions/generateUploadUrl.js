@@ -5,6 +5,7 @@ const {
     BlobSASPermissions
 } = require('@azure/storage-blob');
 const crypto = require('crypto');
+const { checkApimCert } = require('./certAuth');
 
 function getStorageCredential() {
     const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
@@ -55,6 +56,9 @@ app.http('generateUploadUrl', {
     authLevel: 'anonymous',
     route: 'generate-upload-url',
     handler: async (request, context) => {
+        const certError = checkApimCert(request);
+        if (certError) return certError;
+
         try {
             const body = await request.json();
 

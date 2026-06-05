@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
+const certAuth = require("./src/middleware/certAuth");
 const userRoutes = require("./src/routes/userRoutes");
 const readingProgressRoutes = require("./src/routes/readingProgressRoutes");
 const favoriteRoutes = require("./src/routes/favoriteRoutes");
@@ -9,6 +10,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(certAuth);
 
 app.get("/health", (req, res) =>
   res.json({ status: "OK", service: "MS2-NodeJS" })
