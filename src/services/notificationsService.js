@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
-const NOTIFICATIONS_API_URL =
-  import.meta.env.VITE_NOTIFICATIONS_API_URL || "http://localhost:8080";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const SUBSCRIPTION_KEY = import.meta.env.VITE_API_SUBSCRIPTION_KEY;
 
@@ -53,10 +53,14 @@ export async function startNotificationsConnection(
   );
 
   if (!negotiateResponse.ok) {
-    throw new Error("No se pudo obtener la conexión de SignalR.");
+    throw new Error(`Negotiate falló con estado ${negotiateResponse.status}`);
   }
 
   const negotiateData = await negotiateResponse.json();
+
+  if (!negotiateData?.url || !negotiateData?.accessToken) {
+    throw new Error("Negotiate no devolvió url o accessToken.");
+  }
 
   connection = new signalR.HubConnectionBuilder()
     .withUrl(negotiateData.url, {
@@ -96,7 +100,7 @@ export async function getBookLikeStatus(bookId, user) {
   }
 
   const response = await fetch(
-    `${NOTIFICATIONS_API_URL}/books/${bookId}/like-status?userId=${encodeURIComponent(
+    `${API_BASE_URL}/books/${bookId}/like-status?userId=${encodeURIComponent(
       userId
     )}`,
     {
@@ -130,7 +134,7 @@ export async function toggleBookLike(bookId, actorUser) {
     throw new Error("No se pudo identificar el usuario que dio like.");
   }
 
-  const response = await fetch(`${NOTIFICATIONS_API_URL}/books/${bookId}/like`, {
+  const response = await fetch(`${API_BASE_URL}/books/${bookId}/like`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({
