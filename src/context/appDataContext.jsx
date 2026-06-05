@@ -6,20 +6,17 @@ import {
   getReadingProgress,
   getFavorites,
 } from "../services/booksService.js";
-import { useAuth } from "./authContext.jsx";
 
 const AppDataContext = createContext();
 
 export function AppDataProvider({ children }) {
-  const { isAuthenticated } = useAuth();
-
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [books, setBooks] = useState([]);
   const [readingProgress, setReadingProgress] = useState([]);
   const [favorites, setFavorites] = useState([]);
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   async function loadAppData() {
@@ -65,6 +62,8 @@ export function AppDataProvider({ children }) {
       };
 
       const normalizedBooks = normalizeBooks(val(booksRes));
+      console.log("Books from API:", val(booksRes));
+      console.log("Normalized books:", normalizedBooks);
 
       setUsers(val(usersRes));
       setCategories(val(categoriesRes));
@@ -80,17 +79,8 @@ export function AppDataProvider({ children }) {
   }
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadAppData();
-    } else {
-      setUsers([]);
-      setCategories([]);
-      setBooks([]);
-      setReadingProgress([]);
-      setFavorites([]);
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+    loadAppData();
+  }, []);
 
   return (
     <AppDataContext.Provider
