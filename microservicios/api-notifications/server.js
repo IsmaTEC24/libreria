@@ -133,6 +133,13 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/debug-headers", (req, res) => {
+  res.status(200).json({
+    headers: req.headers,
+    hasCert: !!req.headers["x-arr-clientcert"],
+  });
+});
+
 app.post("/notifications/negotiate", (req, res) => {
   try {
     const { userId } = req.body;
