@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 async function getAll(req, res) {
   try {
-    const users = await User.find();
+    const users = await User.find().select('-email');
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });

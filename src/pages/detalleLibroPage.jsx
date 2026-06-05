@@ -100,7 +100,6 @@ export default function DetalleLibroPage() {
       user.name ||
       user.fullName ||
       user.username ||
-      user.email ||
       `Usuario ${userId}`
     );
   }, [book, users]);

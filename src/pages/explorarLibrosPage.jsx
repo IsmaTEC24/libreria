@@ -63,7 +63,7 @@ export default function ExplorarLibrosPage() {
     if (!userId || !users) return "Usuario desconocido";
     const user = users.find((item) => String(item.id) === String(userId));
     if (!user) return "Usuario desconocido";
-    return user.name || user.fullName || user.username || user.email || "Usuario";
+    return user.name || user.fullName || user.username || "Usuario";
   }
 
   function getCoverImage(book) {
