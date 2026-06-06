@@ -33,14 +33,7 @@ export function getUserId(user) {
   );
 }
 
-export async function startNotificationsConnection(
-  userId,
-  onNotificationReceived
-) {
-  if (!userId) {
-    return null;
-  }
-
+export async function startNotificationsConnection(onNotificationReceived) {
   if (connection && connection.state === signalR.HubConnectionState.Connected) {
     return connection;
   }
@@ -50,7 +43,7 @@ export async function startNotificationsConnection(
     {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({}),
     }
   );
 
@@ -101,20 +94,9 @@ export async function stopNotificationsConnection() {
   }
 }
 
-export async function getBookLikeStatus(bookId, user) {
-  const userId = getUserId(user);
-
-  if (!userId) {
-    return {
-      liked: false,
-      likesCount: 0,
-    };
-  }
-
+export async function getBookLikeStatus(bookId) {
   const response = await fetch(
-    `${API_BASE_URL}/books/${bookId}/like-status?userId=${encodeURIComponent(
-      userId
-    )}`,
+    `${API_BASE_URL}/books/${bookId}/like-status`,
     {
       method: "GET",
       headers: getHeaders(),
@@ -133,25 +115,11 @@ export async function getBookLikeStatus(bookId, user) {
   };
 }
 
-export async function toggleBookLike(bookId, actorUser) {
-  const actorUserId = getUserId(actorUser);
-
-  const actorName =
-    actorUser?.name ||
-    actorUser?.username ||
-    "Un usuario";
-
-  if (!actorUserId) {
-    throw new Error("No se pudo identificar el usuario que dio like.");
-  }
-
+export async function toggleBookLike(bookId) {
   const response = await fetch(`${API_BASE_URL}/books/${bookId}/like`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
-      actorUserId,
-      actorName,
-    }),
+    body: JSON.stringify({}),
   });
 
   const data = await response.json().catch(() => null);
@@ -167,6 +135,6 @@ export async function toggleBookLike(bookId, actorUser) {
   };
 }
 
-export async function likeBookAndNotify(bookId, actorUser) {
-  return toggleBookLike(bookId, actorUser);
+export async function likeBookAndNotify(bookId) {
+  return toggleBookLike(bookId);
 }

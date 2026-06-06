@@ -25,24 +25,12 @@ export default function Sidebar() {
   }, [darkMode]);
 
   useEffect(() => {
-    const userId =
-      currentUser?.id ||
-      currentUser?.userId ||
-      currentUser?.user_id ||
-      currentUser?.uid ||
-      currentUser?.firebaseUid ||
-      currentUser?.firebaseUuid ||
-      null;
-
-    if (!userId) {
-      return;
-    }
+    if (!currentUser?.id) return;
 
     let active = true;
 
-    startNotificationsConnection(userId, (notification) => {
+    startNotificationsConnection((notification) => {
       if (!active) return;
-
       setNotifications((prev) => [notification, ...prev].slice(0, 10));
     }).catch((error) => {
       console.error("No se pudo conectar:", error.message);
@@ -54,11 +42,6 @@ export default function Sidebar() {
     };
   }, [
     currentUser?.id,
-    currentUser?.userId,
-    currentUser?.user_id,
-    currentUser?.uid,
-    currentUser?.firebaseUid,
-    currentUser?.firebaseUuid,
   ]);
 
   const currentUserId =

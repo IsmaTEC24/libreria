@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const sql = require("mssql");
 const certAuth = require("./certAuth");
+const jwtAuth = require("./jwtAuth");
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use(
 
 app.use(express.json());
 app.use(certAuth);
+app.use(jwtAuth);
 
 function parseSignalRConnectionString() {
   if (!SIGNALR_CONNECTION_STRING) {
@@ -135,13 +137,7 @@ app.get("/health", (req, res) => {
 
 app.post("/notifications/negotiate", (req, res) => {
   try {
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({
-        message: "userId es obligatorio para conectarse a SignalR.",
-      });
-    }
+    const userId = req.user.id;
 
     const url = getClientUrl();
     const accessToken = generateSignalRToken(url, userId, 3600);
@@ -211,26 +207,12 @@ app.post("/books/:id/like", async (req, res) => {
   try {
     const bookId = Number(req.params.id);
 
-    const actorUserId =
-      req.body.actorUserId ||
-      req.body.actor_user_id ||
-      req.body.userId ||
-      null;
-
-    const actorName =
-      req.body.actorName ||
-      req.body.actor_name ||
-      "Un usuario";
+    const actorUserId = req.user.id;
+    const actorName = req.user.username || "Un usuario";
 
     if (!bookId || Number.isNaN(bookId)) {
       return res.status(400).json({
         message: "El id del libro debe ser válido.",
-      });
-    }
-
-    if (!actorUserId) {
-      return res.status(400).json({
-        message: "actorUserId es obligatorio.",
       });
     }
 
@@ -411,17 +393,11 @@ app.post("/books/:id/like", async (req, res) => {
 app.get("/books/:id/like-status", async (req, res) => {
   try {
     const bookId = Number(req.params.id);
-    const userId = req.query.userId;
+    const userId = req.user.id;
 
     if (!bookId || Number.isNaN(bookId)) {
       return res.status(400).json({
         message: "El id del libro debe ser válido.",
-      });
-    }
-
-    if (!userId) {
-      return res.status(400).json({
-        message: "userId es obligatorio.",
       });
     }
 

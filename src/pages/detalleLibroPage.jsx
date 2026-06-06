@@ -171,7 +171,7 @@ export default function DetalleLibroPage() {
       }
 
       try {
-        const data = await getBookLikeStatus(book.id, currentUser);
+        const data = await getBookLikeStatus(book.id);
         setLiked(Boolean(data.liked));
         setLikesCount(data.likesCount || 0);
       } catch {
@@ -304,7 +304,7 @@ export default function DetalleLibroPage() {
     try {
       setLikeLoading(true);
 
-      const response = await toggleBookLike(book.id, currentUser);
+      const response = await toggleBookLike(book.id);
 
       setLiked(Boolean(response.liked));
       setLikesCount(response.likesCount || 0);
