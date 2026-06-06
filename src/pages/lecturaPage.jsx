@@ -4,7 +4,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import {
   createReadingProgress,
@@ -22,9 +22,7 @@ export default function LecturaPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { books, loading, error, loadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); }, []);
+  const { books, loading, error } = useBooks();
   const { readingProgress, reloadProgress } = useReadingProgress();
 
   const libroId = location.state?.libroId;

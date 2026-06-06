@@ -4,16 +4,16 @@ import BookCard from "../components/bookCard.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
+import { useCategories } from "../hooks/useCategories.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { deleteFavorite, getBookCoverUrl } from "../services/booksService.js";
 
 export default function BibliotecaPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, categories, loading, error, loadBooks, loadCategories } = useAppData();
-
-  useEffect(() => { loadBooks(); loadCategories(); }, []);
+  const { books, loading, error } = useBooks();
+  const { categories } = useCategories();
   const { favorites, reloadFavorites } = useFavorites();
 
   const [searchTerm, setSearchTerm] = useState("");

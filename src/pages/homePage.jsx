@@ -5,7 +5,7 @@ import StatCard from "../components/StatCard.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import { getBookCoverUrl } from "../services/booksService.js";
@@ -13,9 +13,7 @@ import { getBookCoverUrl } from "../services/booksService.js";
 export default function HomePage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, loading, error, loadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); }, []);
+  const { books, loading, error } = useBooks();
   const { favorites } = useFavorites();
   const { readingProgress } = useReadingProgress();
   const [coverUrls, setCoverUrls] = useState({});

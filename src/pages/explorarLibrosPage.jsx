@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { createFavorite, deleteFavorite, getBookCoverUrl } from "../services/booksService.js";
 import EmptyState from "../components/EmptyState.jsx";
@@ -11,9 +11,7 @@ import CoverImage from "../components/CoverImage.jsx";
 export default function ExplorarLibrosPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, loading, error, loadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); }, []);
+  const { books, loading, error } = useBooks();
   const { favorites, reloadFavorites } = useFavorites();
 
   const [coverUrls, setCoverUrls] = useState({});

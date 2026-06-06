@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
 import {
   startNotificationsConnection,
   stopNotificationsConnection,
@@ -10,11 +9,6 @@ import {
 export default function Sidebar() {
   const navigate = useNavigate();
   const { currentUser, logout } = useAuth();
-  const { books, loadBooks } = useAppData();
-
-  useEffect(() => {
-    if (currentUser?.id) loadBooks();
-  }, [currentUser?.id]);
 
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -47,26 +41,6 @@ export default function Sidebar() {
   }, [
     currentUser?.id,
   ]);
-
-  const currentUserId =
-    currentUser?.id ||
-    currentUser?.userId ||
-    currentUser?.user_id ||
-    currentUser?.uid ||
-    currentUser?.firebaseUid ||
-    currentUser?.firebaseUuid ||
-    null;
-
-  const tieneLibros = books.some((book) => {
-    const ownerId =
-      book.user_id ||
-      book.userId ||
-      book.uploaded_by ||
-      book.uploadedBy ||
-      null;
-
-    return currentUserId && ownerId && String(ownerId) === String(currentUserId);
-  });
 
   function getInitials(name = "") {
     return name
@@ -156,19 +130,17 @@ export default function Sidebar() {
         )}
       </div>
 
-      {tieneLibros && (
-        <div className="sidebarSection">
-          <span className="sidebarSectionLabel">Administración</span>
+      <div className="sidebarSection">
+        <span className="sidebarSectionLabel">Administración</span>
 
-          <NavLink to="/admin-libros" className={linkClass}>
-            <span className="sidebarIcon">✎</span> Mis libros
-          </NavLink>
+        <NavLink to="/admin-libros" className={linkClass}>
+          <span className="sidebarIcon">✎</span> Mis libros
+        </NavLink>
 
-          <NavLink to="/nuevo-libro" className={linkClass}>
-            <span className="sidebarIcon">+</span> Nuevo libro
-          </NavLink>
-        </div>
-      )}
+        <NavLink to="/nuevo-libro" className={linkClass}>
+          <span className="sidebarIcon">+</span> Nuevo libro
+        </NavLink>
+      </div>
 
       <div className="sidebarFooter">
         <div className="sidebarUser" onClick={() => navigate("/perfil")}>

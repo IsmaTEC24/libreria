@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
 import { getBookCoverUrl } from "../services/booksService.js";
 import EmptyState from "../components/EmptyState.jsx";
 
 export default function PerfilUsuarioPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { books, loading, error, loadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); }, []);
+  const { books, loading, error } = useBooks();
   const [coverUrls, setCoverUrls] = useState({});
 
   const usuarioId = location.state?.usuarioId;

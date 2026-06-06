@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import { useAuth } from "../context/authContext.jsx";
@@ -22,9 +22,7 @@ export default function DetalleLibroPage() {
 
   const { currentUser } = useAuth();
 
-  const { books = [], loading, error, loadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); }, []);
+  const { books = [], loading, error } = useBooks();
   const { favorites = [], reloadFavorites } = useFavorites();
   const { readingProgress = [] } = useReadingProgress();
 

@@ -6,13 +6,13 @@ import {
   updateBook,
 } from "../services/booksService.js";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useCategories } from "../hooks/useCategories.js";
 
 export default function FormLibroPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { categories, reloadAppData } = useAppData();
+  const { categories } = useCategories();
 
   const libroId = location.state?.libroId;
   const modoEdicion = Boolean(libroId);
@@ -118,7 +118,6 @@ export default function FormLibroPage() {
 
       await createBookWithPdf(bookData, pdfFile, coverFile);
 
-      await reloadAppData();
       navigate("/admin-libros");
     } catch (err) {
       console.error(err);

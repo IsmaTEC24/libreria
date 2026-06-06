@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteBook } from "../services/booksService.js";
 import { useAuth } from "../context/authContext.jsx";
-import { useAppData } from "../context/appDataContext.jsx";
+import { useBooks } from "../hooks/useBooks.js";
+import { useCategories } from "../hooks/useCategories.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
@@ -10,9 +11,8 @@ import Spinner from "../components/Spinner.jsx";
 export default function AdminLibrosPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, categories, loading, error, loadBooks, loadCategories, reloadBooks } = useAppData();
-
-  useEffect(() => { loadBooks(); loadCategories(); }, []);
+  const { books, loading, error, reloadBooks } = useBooks();
+  const { categories } = useCategories();
   const { readingProgress } = useReadingProgress();
 
   const [searchTerm, setSearchTerm] = useState("");
