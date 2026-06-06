@@ -664,7 +664,7 @@ button:disabled {
 
 .bookCardImageWrap {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   position: relative;
   background: var(--surface-soft);
   overflow: hidden;
@@ -697,7 +697,8 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-height: 120px;
+  height: 180px;
+  overflow: hidden;
 }
 
 .bookCardTitle {
@@ -723,7 +724,7 @@ button:disabled {
 }
 
 .bookCard .primaryButton {
-  margin-top: 10px;
+  margin-top: auto;
   padding: 8px 14px;
   font-size: 0.82rem;
 }
@@ -1665,14 +1666,14 @@ body.darkMode .sidebarLogout:hover {
 
 .explorCardImage {
   width: 100%;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   object-fit: cover;
   border-radius: var(--radius-sm);
   display: block;
 }
 
 .explorCard .coverImageWrap {
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   border-radius: var(--radius-sm);
 }
 
@@ -1680,7 +1681,8 @@ body.darkMode .sidebarLogout:hover {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 120px;
+  height: 180px;
+  overflow: hidden;
 }
 
 .explorCardTitle {
