@@ -15,7 +15,29 @@ export function useBooks() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function reload() {
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getBooks(controller.signal);
+        setBooks(Array.isArray(data) ? data.map(normalizeBook) : []);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        setError("No se pudieron cargar los libros.");
+        setBooks([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, []);
+
+  async function reloadBooks() {
     setLoading(true);
     setError("");
     try {
@@ -29,7 +51,5 @@ export function useBooks() {
     }
   }
 
-  useEffect(() => { reload(); }, []);
-
-  return { books, loading, error, reloadBooks: reload };
+  return { books, loading, error, reloadBooks };
 }

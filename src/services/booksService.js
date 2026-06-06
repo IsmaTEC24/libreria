@@ -89,10 +89,8 @@ export async function getCategories() {
 }
 
 /* BOOKS */
-export function getBooks() {
-  return apiRequest("/books", {
-    method: "GET",
-  });
+export function getBooks(signal) {
+  return apiRequest("/books", { method: "GET", signal });
 }
 
 // Temporal: mientras no tengamos conectado GET /books/{id} en Azure Functions,
@@ -244,8 +242,8 @@ export function deleteBook(id) {
 }
 
 /* READING PROGRESS */
-export function getReadingProgress() {
-  return apiRequest("/reading-progress", { method: "GET" });
+export function getReadingProgress(signal) {
+  return apiRequest("/reading-progress", { method: "GET", signal });
 }
 
 export function getReadingProgressById(id) {
@@ -271,8 +269,8 @@ export function deleteReadingProgress(id) {
 }
 
 /* FAVORITES */
-export function getFavorites() {
-  return apiRequest("/favorites", { method: "GET" });
+export function getFavorites(signal) {
+  return apiRequest("/favorites", { method: "GET", signal });
 }
 
 export function getFavoriteById(id) {

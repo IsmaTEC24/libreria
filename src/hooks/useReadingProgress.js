@@ -5,7 +5,27 @@ export function useReadingProgress() {
   const [readingProgress, setReadingProgress] = useState([]);
   const [loadingProgress, setLoadingProgress] = useState(true);
 
-  async function reload() {
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      setLoadingProgress(true);
+      try {
+        const data = await getReadingProgress(controller.signal);
+        setReadingProgress(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        setReadingProgress([]);
+      } finally {
+        setLoadingProgress(false);
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, []);
+
+  async function reloadProgress() {
     setLoadingProgress(true);
     try {
       const data = await getReadingProgress();
@@ -17,7 +37,5 @@ export function useReadingProgress() {
     }
   }
 
-  useEffect(() => { reload(); }, []);
-
-  return { readingProgress, loadingProgress, reloadProgress: reload };
+  return { readingProgress, loadingProgress, reloadProgress };
 }

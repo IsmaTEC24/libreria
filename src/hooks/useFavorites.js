@@ -5,7 +5,27 @@ export function useFavorites() {
   const [favorites, setFavorites] = useState([]);
   const [loadingFav, setLoadingFav] = useState(true);
 
-  async function reload() {
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function load() {
+      setLoadingFav(true);
+      try {
+        const data = await getFavorites(controller.signal);
+        setFavorites(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        setFavorites([]);
+      } finally {
+        setLoadingFav(false);
+      }
+    }
+
+    load();
+    return () => controller.abort();
+  }, []);
+
+  async function reloadFavorites() {
     setLoadingFav(true);
     try {
       const data = await getFavorites();
@@ -17,7 +37,5 @@ export function useFavorites() {
     }
   }
 
-  useEffect(() => { reload(); }, []);
-
-  return { favorites, loadingFav, reloadFavorites: reload };
+  return { favorites, loadingFav, reloadFavorites };
 }
