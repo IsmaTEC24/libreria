@@ -4,11 +4,13 @@ import BookCard from "../components/bookCard.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useFavorites } from "../hooks/useFavorites.js";
 
 export default function MiBibliotecaPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, favorites, loading, error } = useAppData();
+  const { books, loading, error } = useAppData();
+  const { favorites, loadingFav } = useFavorites();
 
   const favoritosUsuario = useMemo(() => {
     const favoritosIds = favorites
@@ -32,7 +34,7 @@ export default function MiBibliotecaPage() {
           <h2>Favoritos</h2>
         </div>
 
-        {loading ? <Spinner inline /> : (
+        {loading || loadingFav ? <Spinner inline /> : (
           <div className="booksGrid">
             {favoritosUsuario.map((book) => (
               <div

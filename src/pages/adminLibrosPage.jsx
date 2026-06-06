@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { deleteBook } from "../services/booksService.js";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
 
 export default function AdminLibrosPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, categories, readingProgress, loading, error, reloadAppData } = useAppData();
+  const { books, categories, loading, error, reloadAppData } = useAppData();
+  const { readingProgress } = useReadingProgress();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");

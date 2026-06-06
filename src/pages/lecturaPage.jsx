@@ -5,6 +5,7 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import {
   createReadingProgress,
   updateReadingProgress,
@@ -21,7 +22,8 @@ export default function LecturaPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { books, loading, error, readingProgress, reloadAppData } = useAppData();
+  const { books, loading, error } = useAppData();
+  const { readingProgress, reloadProgress } = useReadingProgress();
 
   const libroId = location.state?.libroId;
 
@@ -132,7 +134,7 @@ export default function LecturaPage() {
       }
       setSavedPage(pageNumber);
       setSaveMessage(`Progreso guardado en la página ${pageNumber}.`);
-      await reloadAppData();
+      await reloadProgress();
     } catch {
       setSaveMessage("Error al guardar el progreso.");
     }

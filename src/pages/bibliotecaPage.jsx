@@ -5,12 +5,14 @@ import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useFavorites } from "../hooks/useFavorites.js";
 import { deleteFavorite, getBookCoverUrl } from "../services/booksService.js";
 
 export default function BibliotecaPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, categories, favorites, loading, error, reloadAppData } = useAppData();
+  const { books, categories, loading, error } = useAppData();
+  const { favorites, reloadFavorites } = useFavorites();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -71,7 +73,7 @@ export default function BibliotecaPage() {
     if (!registro) return;
     try {
       await deleteFavorite(registro.id);
-      await reloadAppData();
+      await reloadFavorites();
     } catch (err) {
       console.error(err);
     }

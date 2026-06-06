@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useFavorites } from "../hooks/useFavorites.js";
 import { createFavorite, deleteFavorite, getBookCoverUrl } from "../services/booksService.js";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
@@ -10,7 +11,8 @@ import CoverImage from "../components/CoverImage.jsx";
 export default function ExplorarLibrosPage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, users, favorites, loading, error, reloadAppData } = useAppData();
+  const { books, users, loading, error } = useAppData();
+  const { favorites, reloadFavorites } = useFavorites();
 
   const [coverUrls, setCoverUrls] = useState({});
   const [loadingBib, setLoadingBib] = useState({});
@@ -81,7 +83,7 @@ export default function ExplorarLibrosPage() {
       } else {
         await createFavorite({ userId: currentUser.id, bookId: book.id });
       }
-      await reloadAppData();
+      await reloadFavorites();
     } catch (err) {
       console.error(err);
     } finally {

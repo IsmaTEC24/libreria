@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useFavorites } from "../hooks/useFavorites.js";
+import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import { useAuth } from "../context/authContext.jsx";
 import {
   updateBook,
@@ -20,15 +22,9 @@ export default function DetalleLibroPage() {
 
   const { currentUser } = useAuth();
 
-  const {
-    books = [],
-    users = [],
-    loading,
-    error,
-    reloadAppData,
-    favorites = [],
-    readingProgress = [],
-  } = useAppData();
+  const { books = [], users = [], loading, error } = useAppData();
+  const { favorites = [], reloadFavorites } = useFavorites();
+  const { readingProgress = [] } = useReadingProgress();
 
   const libroId = location.state?.libroId;
 
@@ -196,9 +192,7 @@ export default function DetalleLibroPage() {
         });
       }
 
-      if (reloadAppData) {
-        await reloadAppData();
-      }
+      await reloadFavorites();
     } catch {
       alert("No se pudo actualizar tu biblioteca.");
     }
@@ -236,9 +230,7 @@ export default function DetalleLibroPage() {
       setSaveMessage("Libro actualizado correctamente.");
       setIsEditing(false);
 
-      if (reloadAppData) {
-        await reloadAppData();
-      }
+      await reloadFavorites();
     } catch {
       setSaveMessage("No se pudo actualizar el libro.");
     }
@@ -278,9 +270,7 @@ export default function DetalleLibroPage() {
     try {
       await deleteBook(book.id);
 
-      if (reloadAppData) {
-        await reloadAppData();
-      }
+      await reloadFavorites();
 
       navigate("/explorar-libros");
     } catch {

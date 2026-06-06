@@ -6,12 +6,16 @@ import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { useAuth } from "../context/authContext.jsx";
 import { useAppData } from "../context/appDataContext.jsx";
+import { useFavorites } from "../hooks/useFavorites.js";
+import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import { getBookCoverUrl } from "../services/booksService.js";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { books, favorites, readingProgress, loading, error } = useAppData();
+  const { books, loading, error } = useAppData();
+  const { favorites } = useFavorites();
+  const { readingProgress } = useReadingProgress();
   const [coverUrls, setCoverUrls] = useState({});
 
   const userBooks = useMemo(() => {

@@ -7,7 +7,7 @@ import EmptyState from "../components/EmptyState.jsx";
 export default function PerfilUsuarioPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { books, users, readingProgress, loading, error } = useAppData();
+  const { books, users, loading, error } = useAppData();
   const [coverUrls, setCoverUrls] = useState({});
 
   const usuarioId = location.state?.usuarioId;
@@ -21,15 +21,8 @@ export default function PerfilUsuarioPage() {
     return books.filter((b) => String(b.userId) === String(usuario.id));
   }, [books, usuario]);
 
-  const librosEnProces = useMemo(() => {
-    if (!usuario) return [];
-    return readingProgress.filter((p) => String(p.userId) === String(usuario.id) && p.percentage > 0 && p.percentage < 100);
-  }, [readingProgress, usuario]);
-
-  const librosDeterminados = useMemo(() => {
-    if (!usuario) return [];
-    return readingProgress.filter((p) => String(p.userId) === String(usuario.id) && p.percentage === 100);
-  }, [readingProgress, usuario]);
+  const librosEnProces = [];
+  const librosDeterminados = [];
 
   async function loadCoverUrls() {
     const allBooks = [...librosSubidos, ...librosEnProces.map((p) => books.find((b) => String(b.id) === String(p.bookId))).filter(Boolean), ...librosDeterminados.map((p) => books.find((b) => String(b.id) === String(p.bookId))).filter(Boolean)];
@@ -72,7 +65,7 @@ export default function PerfilUsuarioPage() {
           </div>
           <div className="perfilUsuarioInfo">
             <h1>{usuario.name}</h1>
-            <p className="perfilUsuarioEmail">{usuario.email}</p>
+            <p className="perfilUsuarioEmail">@{usuario.username}</p>
           </div>
           <button className="secondaryButton" onClick={() => navigate(-1)}>
             ← Volver
