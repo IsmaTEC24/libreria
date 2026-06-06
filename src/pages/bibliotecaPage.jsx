@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import BookCard from "../components/bookCard.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
+import Pagination from "../components/Pagination.jsx";
 import { useAuth } from "../context/authContext.jsx";
 import { useBooks } from "../hooks/useBooks.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { deleteFavorite, getBookCoverUrl } from "../services/booksService.js";
+
+const PAGE_SIZE = 5;
 
 export default function BibliotecaPage() {
   const navigate = useNavigate();
@@ -20,6 +23,8 @@ export default function BibliotecaPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filterType, setFilterType] = useState("all");
   const [coverUrls, setCoverUrls] = useState({});
+  const [pageMisLibros, setPageMisLibros] = useState(1);
+  const [pageGuardados, setPageGuardados] = useState(1);
 
   const misRegistrosFavoritos = useMemo(() => {
     return favorites.filter((f) => String(f.userId) === String(currentUser?.id));
@@ -196,10 +201,10 @@ export default function BibliotecaPage() {
                 </h3>
               </div>
               <div className="booksGrid">
-                {filteredMisLibros.map((book) => (
+                {filteredMisLibros.slice((pageMisLibros - 1) * PAGE_SIZE, pageMisLibros * PAGE_SIZE).map((book) => (
                   <div
                     key={book.id}
-                    onClick={() => navigate("/detalle-libro", { state: { libroId: book.id } })}
+                    onClick={() => navigate("/detalle-libro", { state: { libroId: book.id, from: "/biblioteca" } })}
                     style={{ cursor: "pointer" }}
                   >
                     <BookCard
@@ -210,6 +215,11 @@ export default function BibliotecaPage() {
                   </div>
                 ))}
               </div>
+              <Pagination
+                currentPage={pageMisLibros}
+                totalPages={Math.ceil(filteredMisLibros.length / PAGE_SIZE)}
+                onPageChange={setPageMisLibros}
+              />
             </>
           )}
         </>
@@ -238,10 +248,10 @@ export default function BibliotecaPage() {
                 </h3>
               </div>
               <div className="booksGrid">
-                {filteredGuardados.map((book) => (
+                {filteredGuardados.slice((pageGuardados - 1) * PAGE_SIZE, pageGuardados * PAGE_SIZE).map((book) => (
                   <div key={book.id} className="guardadoCardWrapper">
                     <div
-                      onClick={() => navigate("/detalle-libro", { state: { libroId: book.id } })}
+                      onClick={() => navigate("/detalle-libro", { state: { libroId: book.id, from: "/biblioteca" } })}
                       style={{ cursor: "pointer" }}
                     >
                       <BookCard
@@ -256,6 +266,11 @@ export default function BibliotecaPage() {
                   </div>
                 ))}
               </div>
+              <Pagination
+                currentPage={pageGuardados}
+                totalPages={Math.ceil(filteredGuardados.length / PAGE_SIZE)}
+                onPageChange={setPageGuardados}
+              />
             </>
           ) : null}
         </>

@@ -4,11 +4,14 @@ import BookCard from "../components/bookCard.jsx";
 import StatCard from "../components/StatCard.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
+import Pagination from "../components/Pagination.jsx";
 import { useAuth } from "../context/authContext.jsx";
 import { useBooks } from "../hooks/useBooks.js";
 import { useFavorites } from "../hooks/useFavorites.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import { getBookCoverUrl } from "../services/booksService.js";
+
+const PAGE_SIZE = 5;
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -17,6 +20,8 @@ export default function HomePage() {
   const { favorites } = useFavorites();
   const { readingProgress } = useReadingProgress();
   const [coverUrls, setCoverUrls] = useState({});
+  const [pageReading, setPageReading] = useState(1);
+  const [pageBiblioteca, setPageBiblioteca] = useState(1);
 
   const userBooks = useMemo(() => {
     if (!currentUser) return [];
@@ -152,23 +157,30 @@ export default function HomePage() {
             }
           />
         ) : (
-          <div className="booksGrid">
-            {continueReadingBooks.map((book) => (
-              <div
-                key={book.id}
-                onClick={() => navigate("/lectura", { state: { libroId: book.id } })}
-                style={{ cursor: "pointer" }}
-              >
-                <BookCard
-                  titulo={book.title}
-                  autor={book.author}
-                  portada={getCoverImage(book)}
-                  progreso={book.percentage}
-                  mostrarProgreso={true}
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="booksGrid">
+              {continueReadingBooks.slice((pageReading - 1) * PAGE_SIZE, pageReading * PAGE_SIZE).map((book) => (
+                <div
+                  key={book.id}
+                  onClick={() => navigate("/lectura", { state: { libroId: book.id, from: "/home" } })}
+                  style={{ cursor: "pointer" }}
+                >
+                  <BookCard
+                    titulo={book.title}
+                    autor={book.author}
+                    portada={getCoverImage(book)}
+                    progreso={book.percentage}
+                    mostrarProgreso={true}
+                  />
+                </div>
+              ))}
+            </div>
+            <Pagination
+              currentPage={pageReading}
+              totalPages={Math.ceil(continueReadingBooks.length / PAGE_SIZE)}
+              onPageChange={setPageReading}
+            />
+          </>
         )}
       </section>
 
@@ -202,21 +214,28 @@ export default function HomePage() {
             }
           />
         ) : (
-          <div className="booksGrid">
-            {misBibliotecaLibros.slice(0, 6).map((book) => (
-              <div
-                key={book.id}
-                onClick={() => navigate("/detalle-libro", { state: { libroId: book.id, from: "/home" } })}
-                style={{ cursor: "pointer" }}
-              >
-                <BookCard
-                  titulo={book.title}
-                  autor={book.author}
-                  portada={getCoverImage(book)}
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            <div className="booksGrid">
+              {misBibliotecaLibros.slice((pageBiblioteca - 1) * PAGE_SIZE, pageBiblioteca * PAGE_SIZE).map((book) => (
+                <div
+                  key={book.id}
+                  onClick={() => navigate("/detalle-libro", { state: { libroId: book.id, from: "/home" } })}
+                  style={{ cursor: "pointer" }}
+                >
+                  <BookCard
+                    titulo={book.title}
+                    autor={book.author}
+                    portada={getCoverImage(book)}
+                  />
+                </div>
+              ))}
+            </div>
+            <Pagination
+              currentPage={pageBiblioteca}
+              totalPages={Math.ceil(misBibliotecaLibros.length / PAGE_SIZE)}
+              onPageChange={setPageBiblioteca}
+            />
+          </>
         )}
       </section>
 

@@ -697,7 +697,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  flex: 1;
+  min-height: 120px;
 }
 
 .bookCardTitle {
@@ -707,12 +707,19 @@ button:disabled {
   font-weight: 600;
   color: var(--text);
   line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .bookCardAuthor {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bookCard .primaryButton {
@@ -1658,13 +1665,14 @@ body.darkMode .sidebarLogout:hover {
 
 .explorCardImage {
   width: 100%;
-  height: 200px;
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   border-radius: var(--radius-sm);
+  display: block;
 }
 
 .explorCard .coverImageWrap {
-  height: 200px;
+  aspect-ratio: 2 / 3;
   border-radius: var(--radius-sm);
 }
 
@@ -1672,22 +1680,29 @@ body.darkMode .sidebarLogout:hover {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
+  min-height: 120px;
 }
 
 .explorCardTitle {
   font-family: 'Lora', Georgia, serif;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .explorCardAuthor {
-  font-size: 0.88rem;
-  color: var(--text-soft);
+  font-size: 0.8rem;
+  color: var(--muted);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .explorCardDescription {
@@ -2205,4 +2220,67 @@ body.darkMode .likeButtonActive {
   background: #7A3D52;
   border-color: #7A3D52;
   color: #FFE4EA;
+}
+
+/* ── Pagination ───────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.paginationBtn {
+  padding: 7px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  min-width: 38px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.paginationBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.paginationBtnActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.paginationBtnActive:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+body.darkMode .paginationBtn {
+  background: #2a2035;
+  border-color: #4a3f5c;
+  color: var(--text);
+}
+
+body.darkMode .paginationBtn:hover:not(:disabled) {
+  background: #3d2f52;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+body.darkMode .paginationBtnActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }

@@ -148,7 +148,12 @@ export default function LecturaPage() {
       if (!confirmarSalida) return;
     }
 
-    navigate("/detalle-libro", { state: { libroId: book.id } });
+    const from = location.state?.from;
+    if (from) {
+      navigate(from);
+    } else {
+      navigate("/detalle-libro", { state: { libroId: book.id } });
+    }
   }
 
   const progreso = numPages ? (pageNumber / numPages) * 100 : 0;

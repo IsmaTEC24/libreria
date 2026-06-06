@@ -7,6 +7,9 @@ import { useCategories } from "../hooks/useCategories.js";
 import { useReadingProgress } from "../hooks/useReadingProgress.js";
 import EmptyState from "../components/EmptyState.jsx";
 import Spinner from "../components/Spinner.jsx";
+import Pagination from "../components/Pagination.jsx";
+
+const PAGE_SIZE = 5;
 
 export default function AdminLibrosPage() {
   const navigate = useNavigate();
@@ -17,12 +20,14 @@ export default function AdminLibrosPage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const librosUsuario = useMemo(() => {
     return books.filter((book) => book.userId === currentUser?.id);
   }, [books, currentUser]);
 
   const filteredBooks = useMemo(() => {
+    setCurrentPage(1);
     return librosUsuario.filter((book) => {
       const matchesSearch =
         book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,6 +36,8 @@ export default function AdminLibrosPage() {
       return matchesSearch && matchesCategory;
     });
   }, [librosUsuario, searchTerm, categoryFilter]);
+
+  const pagedBooks = filteredBooks.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   function hasReadingProgress(bookId) {
     return readingProgress?.some(
@@ -102,6 +109,7 @@ export default function AdminLibrosPage() {
           }
         />
       ) : (
+        <>
         <div className="tableContainer">
           <table className="booksTable">
             <thead>
@@ -115,7 +123,7 @@ export default function AdminLibrosPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredBooks.map((book) => (
+              {pagedBooks.map((book) => (
                 <tr key={book.id}>
                   <td style={{ fontWeight: 500 }}>{book.title}</td>
                   <td style={{ color: "var(--muted)" }}>{book.author}</td>
@@ -151,6 +159,12 @@ export default function AdminLibrosPage() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredBooks.length / PAGE_SIZE)}
+          onPageChange={setCurrentPage}
+        />
+        </>
       )}
 
     </section>
