@@ -79,7 +79,9 @@ export function AppDataProvider({ children }) {
   }
 
   useEffect(() => {
-    loadAppData();
+    if (currentUser?.id) {
+      loadAppData();
+    }
   }, [currentUser?.id]);
 
   return (
