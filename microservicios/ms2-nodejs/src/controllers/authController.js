@@ -4,23 +4,43 @@ const User = require("../models/User");
 
 function verifyFirebaseToken(idToken) {
   return new Promise((resolve, reject) => {
-    const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`;
-    https.get(url, (res) => {
+    const apiKey = process.env.FIREBASE_API_KEY;
+    if (!apiKey) return reject(new Error("FIREBASE_API_KEY no configurado"));
+
+    const body = JSON.stringify({ idToken });
+    const options = {
+      hostname: "identitytoolkit.googleapis.com",
+      path: `/v1/accounts:lookup?key=${apiKey}`,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+      },
+    };
+
+    const req = https.request(options, (res) => {
       let data = "";
       res.on("data", (chunk) => { data += chunk; });
       res.on("end", () => {
         try {
           const parsed = JSON.parse(data);
-          if (parsed.error_description || !parsed.sub) {
-            reject(new Error(parsed.error_description || "Token inválido"));
+          if (parsed.error || !parsed.users || parsed.users.length === 0) {
+            reject(new Error(parsed.error?.message || "Token de Firebase inválido"));
           } else {
-            resolve(parsed);
+            resolve({
+              sub: parsed.users[0].localId,
+              email: parsed.users[0].email,
+            });
           }
         } catch {
-          reject(new Error("Respuesta inválida de Google"));
+          reject(new Error("Respuesta inválida de Firebase"));
         }
       });
-    }).on("error", reject);
+    });
+
+    req.on("error", reject);
+    req.write(body);
+    req.end();
   });
 }
 
@@ -31,8 +51,8 @@ async function login(req, res) {
   }
 
   try {
-    const googlePayload = await verifyFirebaseToken(idToken);
-    const firebaseUid = googlePayload.sub;
+    const firebasePayload = await verifyFirebaseToken(idToken);
+    const firebaseUid = firebasePayload.sub;
 
     const user = await User.findOne({ firebaseUid });
     if (!user) {
