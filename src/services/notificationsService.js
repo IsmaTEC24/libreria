@@ -63,7 +63,7 @@ export async function startNotificationsConnection(onNotificationReceived) {
         const resp = await fetch(`${API_BASE_URL}/notifications/negotiate`, {
           method: "POST",
           headers: getHeaders(),
-          body: JSON.stringify({ userId }),
+          body: JSON.stringify({}),
         });
         if (!resp.ok) return negotiateData.accessToken;
         const fresh = await resp.json();
