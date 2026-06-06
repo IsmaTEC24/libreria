@@ -10,7 +10,11 @@ import {
   reauthenticateWithCredential,
 } from "firebase/auth";
 import { auth } from "../firebase.js";
-import { getUserByFirebaseUid, createUser, updateUser } from "../services/usersService.js";
+import { createUser, updateUser } from "../services/usersService.js";
+import { getToken, setToken, clearToken } from "../services/authToken.js";
+
+const SUBSCRIPTION_KEY = import.meta.env.VITE_API_SUBSCRIPTION_KEY;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AuthContext = createContext();
 
@@ -23,6 +27,20 @@ function deriveInitials(name = "") {
     .join("");
 }
 
+async function exchangeFirebaseToken(firebaseUser) {
+  const idToken = await firebaseUser.getIdToken();
+  const response = await fetch(`${API_BASE_URL}/auth/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+    },
+    body: JSON.stringify({ idToken }),
+  });
+  if (!response.ok) throw new Error(`Auth exchange failed: ${response.status}`);
+  return response.json();
+}
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -31,12 +49,15 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const apiUser = await getUserByFirebaseUid(firebaseUser.uid);
-          setCurrentUser({ ...apiUser, uid: firebaseUser.uid });
+          const { token, user } = await exchangeFirebaseToken(firebaseUser);
+          setToken(token);
+          setCurrentUser({ ...user, uid: firebaseUser.uid });
         } catch {
+          clearToken();
           setCurrentUser(null);
         }
       } else {
+        clearToken();
         setCurrentUser(null);
       }
       setLoadingAuth(false);
@@ -52,7 +73,7 @@ export function AuthProvider({ children }) {
   async function register(name, username, email, password) {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
 
-    const apiUser = await createUser({
+    await createUser({
       username,
       name,
       email,
@@ -61,16 +82,20 @@ export function AuthProvider({ children }) {
       firebaseUid: credential.user.uid,
     });
 
-    setCurrentUser({ ...apiUser, uid: credential.user.uid });
+    // Usuario recién creado en Cosmos — intercambiar token ahora que existe
+    const { token, user } = await exchangeFirebaseToken(credential.user);
+    setToken(token);
+    setCurrentUser({ ...user, uid: credential.user.uid });
+
     return credential;
   }
 
   async function logout() {
     await signOut(auth);
+    clearToken();
     setCurrentUser(null);
   }
 
-  // Actualiza campos del perfil en Azure solamente
   async function updateAzureProfile(fields) {
     const { uid, ...azureData } = currentUser;
     const updated = await updateUser(currentUser.id, { ...azureData, ...fields });
@@ -85,7 +110,6 @@ export function AuthProvider({ children }) {
     await updateAzureProfile({ username });
   }
 
-  // Actualiza email en Firebase + Azure
   async function updateProfileEmail(currentPassword, newEmail) {
     const credential = EmailAuthProvider.credential(
       auth.currentUser.email,
@@ -96,7 +120,6 @@ export function AuthProvider({ children }) {
     await updateAzureProfile({ email: newEmail });
   }
 
-  // Actualiza contraseña solo en Firebase
   async function updateProfilePassword(currentPassword, newPassword) {
     const credential = EmailAuthProvider.credential(
       auth.currentUser.email,

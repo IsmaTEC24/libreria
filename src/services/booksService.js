@@ -1,16 +1,23 @@
+import { getToken } from "./authToken.js";
+
 const SUBSCRIPTION_KEY = import.meta.env.VITE_API_SUBSCRIPTION_KEY;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const defaultHeaders = {
-  "Content-Type": "application/json",
-  "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
-};
+function getHeaders() {
+  const headers = {
+    "Content-Type": "application/json",
+    "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+  };
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
 
 async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
-      ...defaultHeaders,
+      ...getHeaders(),
       ...options.headers,
     },
   });

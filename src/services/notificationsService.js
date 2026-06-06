@@ -1,4 +1,5 @@
 import * as signalR from "@microsoft/signalr";
+import { getToken } from "./authToken.js";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -14,11 +15,9 @@ function getHeaders() {
   const headers = {
     "Content-Type": "application/json",
   };
-
-  if (SUBSCRIPTION_KEY) {
-    headers["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY;
-  }
-
+  if (SUBSCRIPTION_KEY) headers["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY;
+  const token = getToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
 }
 
