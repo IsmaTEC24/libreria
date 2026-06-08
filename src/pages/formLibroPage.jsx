@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   createBookWithPdf,
   getBookById,
-  updateBook,
+  updateBookWithFiles,
 } from "../services/booksService.js";
 import { useAuth } from "../context/authContext.jsx";
 import { useCategories } from "../hooks/useCategories.js";
@@ -80,50 +80,53 @@ export default function FormLibroPage() {
   }
 
   async function handleSubmit(event) {
-    event.preventDefault();
+  event.preventDefault();
 
-    if (!modoEdicion && !pdfFile) {
-      alert("Debes subir un archivo PDF.");
+  if (!modoEdicion && !pdfFile) {
+    alert("Debes subir un archivo PDF.");
+    return;
+  }
+
+  try {
+    const userId =
+      currentUser?.id ||
+      currentUser?.userId ||
+      currentUser?.user_id ||
+      currentUser?.uid ||
+      null;
+
+    if (!userId) {
+      alert("No se pudo identificar el usuario actual.");
       return;
     }
 
-    try {
-      const userId =
-        currentUser?.id ||
-        currentUser?.userId ||
-        currentUser?.user_id ||
-        currentUser?.uid ||
-        null;
+    const bookData = {
+      userId,
+      title: formData.title,
+      author: formData.author,
+      category: formData.category,
+      description: formData.description || "",
+      language: formData.language || "es",
+      currentStatus: formData.currentStatus || "activo",
+      isPublic: formData.isPublic ?? true,
+    };
 
-      if (!userId) {
-        alert("No se pudo identificar el usuario actual.");
-        return;
-      }
-
-      const bookData = {
-        userId,
-        title: formData.title,
-        author: formData.author,
-        category: formData.category,
-        description: formData.description || "",
-        language: formData.language || "es",
-        currentStatus: formData.currentStatus || "activo",
-        isPublic: formData.isPublic ?? true,
-      };
-
-      if (modoEdicion) {
-        alert("La edición de libros todavía no está conectada al backend nuevo.");
-        return;
-      }
-
-      await createBookWithPdf(bookData, pdfFile, coverFile);
-
+    if (modoEdicion) {
+      await updateBookWithFiles(libroId, bookData, pdfFile, coverFile);
+      alert("Libro actualizado correctamente.");
       navigate("/admin-libros");
-    } catch (err) {
-      console.error(err);
-      alert("No se pudo guardar el libro.");
+      return;
     }
+
+    await createBookWithPdf(bookData, pdfFile, coverFile);
+    alert("Libro creado correctamente.");
+    navigate("/admin-libros");
+
+  } catch (err) {
+    console.error(err);
+    alert("No se pudo guardar el libro.");
   }
+}
 
   if (!currentUser) return <p>Debes iniciar sesión.</p>;
   if (loading) return <p>Cargando formulario...</p>;
